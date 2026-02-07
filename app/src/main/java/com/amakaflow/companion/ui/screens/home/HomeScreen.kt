@@ -339,7 +339,7 @@ private fun QuickActionButtons(
                 .height(80.dp)
                 .clip(RoundedCornerShape(AmakaCornerRadius.md.dp))
                 .clickable(onClick = onLogWorkout)
-                .testTag("voice_workout_fab"),
+                .testTag("log_workout_button"),
             color = AmakaColors.accentGreen,
             shape = RoundedCornerShape(AmakaCornerRadius.md.dp)
         ) {

@@ -18,7 +18,10 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
@@ -179,6 +182,7 @@ fun AmakaFlowBottomNavBar(
     }
 }
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun MainScreen(testConfig: TestConfig) {
     val navController = rememberNavController()
@@ -199,6 +203,7 @@ fun MainScreen(testConfig: TestConfig) {
     val startDestination = if (effectivelyPaired) Screen.Home.route else Screen.Pairing.route
 
     Scaffold(
+        modifier = Modifier.semantics { testTagsAsResourceId = true },
         bottomBar = {
             if (showBottomBar) {
                 AmakaFlowBottomNavBar(navController = navController)
