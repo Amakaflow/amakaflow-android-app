@@ -24,6 +24,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -79,6 +80,7 @@ fun VoiceWorkoutScreen(
         modifier = Modifier
             .fillMaxSize()
             .background(AmakaColors.background)
+            .testTag("voice_workout_screen")
     ) {
         // Header
         Row(
@@ -256,7 +258,8 @@ private fun ReadyToRecordContent(
             modifier = Modifier
                 .size(140.dp)
                 .clip(CircleShape)
-                .clickable(onClick = onStartRecording),
+                .clickable(onClick = onStartRecording)
+                .testTag("record_button"),
             color = AmakaColors.accentBlue,
             shape = CircleShape
         ) {

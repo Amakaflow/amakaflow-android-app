@@ -22,6 +22,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -71,7 +72,8 @@ fun HomeScreen(
         modifier = Modifier
             .fillMaxSize()
             .background(AmakaColors.background)
-            .padding(horizontal = AmakaSpacing.md.dp),
+            .padding(horizontal = AmakaSpacing.md.dp)
+            .testTag("home_screen"),
         verticalArrangement = Arrangement.spacedBy(AmakaSpacing.lg.dp)
     ) {
         // Date header (iOS style)
@@ -336,7 +338,8 @@ private fun QuickActionButtons(
                 .weight(1f)
                 .height(80.dp)
                 .clip(RoundedCornerShape(AmakaCornerRadius.md.dp))
-                .clickable(onClick = onLogWorkout),
+                .clickable(onClick = onLogWorkout)
+                .testTag("voice_workout_fab"),
             color = AmakaColors.accentGreen,
             shape = RoundedCornerShape(AmakaCornerRadius.md.dp)
         ) {

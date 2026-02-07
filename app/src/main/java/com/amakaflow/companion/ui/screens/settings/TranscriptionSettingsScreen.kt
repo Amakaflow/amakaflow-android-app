@@ -15,6 +15,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.amakaflow.companion.ui.theme.AmakaColors
@@ -75,6 +76,7 @@ fun TranscriptionSettingsScreen(
         modifier = Modifier
             .fillMaxSize()
             .background(AmakaColors.background)
+            .testTag("transcription_settings_screen")
     ) {
         // Header
         Row(
