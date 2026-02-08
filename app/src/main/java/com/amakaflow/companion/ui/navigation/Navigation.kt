@@ -18,6 +18,10 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.ExperimentalComposeUiApi
+import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
@@ -81,36 +85,42 @@ sealed class Screen(val route: String) {
 sealed class BottomNavItem(
     val route: String,
     val title: String,
+    val testTagId: String,
     val selectedIcon: ImageVector,
     val unselectedIcon: ImageVector
 ) {
     data object Home : BottomNavItem(
         route = Screen.Home.route,
         title = "Home",
+        testTagId = "nav_home",
         selectedIcon = Icons.Filled.Home,
         unselectedIcon = Icons.Outlined.Home
     )
     data object Workouts : BottomNavItem(
         route = Screen.Workouts.route,
         title = "Workouts",
+        testTagId = "nav_workouts",
         selectedIcon = Icons.Filled.FitnessCenter,
         unselectedIcon = Icons.Outlined.FitnessCenter
     )
     data object Sources : BottomNavItem(
         route = Screen.Sources.route,
         title = "Sources",
+        testTagId = "nav_history",
         selectedIcon = Icons.Filled.Download,
         unselectedIcon = Icons.Outlined.Download
     )
     data object Calendar : BottomNavItem(
         route = Screen.Calendar.route,
         title = "Calendar",
+        testTagId = "nav_calendar",
         selectedIcon = Icons.Filled.DateRange,
         unselectedIcon = Icons.Outlined.DateRange
     )
     data object More : BottomNavItem(
         route = Screen.More.route,
         title = "More",
+        testTagId = "nav_more",
         selectedIcon = Icons.Filled.MoreHoriz,
         unselectedIcon = Icons.Outlined.MoreHoriz
     )
@@ -132,6 +142,7 @@ fun AmakaFlowBottomNavBar(
     val currentDestination = navBackStackEntry?.destination
 
     NavigationBar(
+        modifier = Modifier.testTag("bottom_navigation"),
         containerColor = AmakaColors.surface,
         contentColor = AmakaColors.textPrimary
     ) {
@@ -139,6 +150,7 @@ fun AmakaFlowBottomNavBar(
             val selected = currentDestination?.hierarchy?.any { it.route == item.route } == true
 
             NavigationBarItem(
+                modifier = Modifier.testTag(item.testTagId),
                 icon = {
                     Icon(
                         imageVector = if (selected) item.selectedIcon else item.unselectedIcon,
@@ -170,6 +182,7 @@ fun AmakaFlowBottomNavBar(
     }
 }
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun MainScreen(testConfig: TestConfig) {
     val navController = rememberNavController()
@@ -179,13 +192,18 @@ fun MainScreen(testConfig: TestConfig) {
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
 
-    // Show bottom bar only when paired and not on pairing screen
-    val showBottomBar = settingsState.isPaired && currentRoute != Screen.Pairing.route
+    // In test mode with skipOnboarding, treat as paired regardless
+    val effectivelyPaired = settingsState.isPaired ||
+        (testConfig.isTestModeEnabled && testConfig.skipOnboarding)
 
-    // Start destination based on pairing state
-    val startDestination = if (settingsState.isPaired) Screen.Home.route else Screen.Pairing.route
+    // Show bottom bar only when paired and not on pairing screen
+    val showBottomBar = effectivelyPaired && currentRoute != Screen.Pairing.route
+
+    // Start destination based on pairing state (test mode can bypass pairing)
+    val startDestination = if (effectivelyPaired) Screen.Home.route else Screen.Pairing.route
 
     Scaffold(
+        modifier = Modifier.semantics { testTagsAsResourceId = true },
         bottomBar = {
             if (showBottomBar) {
                 AmakaFlowBottomNavBar(navController = navController)

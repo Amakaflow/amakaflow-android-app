@@ -5,6 +5,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -23,6 +24,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -68,6 +70,7 @@ fun HistoryScreen(
         modifier = Modifier
             .fillMaxSize()
             .background(AmakaColors.background)
+            .testTag("history_screen")
     ) {
         // Header with back button and filter
         Row(
@@ -194,6 +197,7 @@ fun HistoryScreen(
                                 Spacer(modifier = Modifier.height(AmakaSpacing.md.dp))
                             }
 
+                            var completionIndex = 0
                             uiState.groupedCompletions.forEach { (category, completions) ->
                                 item {
                                     Text(
@@ -206,12 +210,15 @@ fun HistoryScreen(
                                         )
                                     )
                                 }
-                                items(completions) { completion ->
+                                val startIndex = completionIndex
+                                itemsIndexed(completions) { index, completion ->
                                     CompletionListItem(
                                         completion = completion,
+                                        index = startIndex + index,
                                         onClick = { onNavigateToCompletionDetail(completion.id) }
                                     )
                                 }
+                                completionIndex += completions.size
                             }
 
                             // Loading more indicator
@@ -297,13 +304,15 @@ private fun StatColumn(value: String, label: String) {
 @Composable
 private fun CompletionListItem(
     completion: WorkoutCompletion,
+    index: Int,
     onClick: () -> Unit
 ) {
     Surface(
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(AmakaCornerRadius.md.dp))
-            .clickable(onClick = onClick),
+            .clickable(onClick = onClick)
+            .testTag("completion_item_$index"),
         color = AmakaColors.surface,
         shape = RoundedCornerShape(AmakaCornerRadius.md.dp)
     ) {

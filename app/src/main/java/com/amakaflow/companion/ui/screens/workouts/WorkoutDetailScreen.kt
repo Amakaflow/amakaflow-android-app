@@ -15,6 +15,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -57,6 +58,7 @@ fun WorkoutDetailScreen(
     }
 
     Scaffold(
+        modifier = Modifier.testTag("workout_detail_screen"),
         topBar = {
             TopAppBar(
                 title = {
@@ -129,7 +131,8 @@ fun WorkoutDetailScreen(
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(innerPadding),
+                        .padding(innerPadding)
+                        .testTag("error_view"),
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
@@ -159,7 +162,8 @@ private fun WorkoutDetailContent(
     LazyColumn(
         modifier = modifier
             .fillMaxSize()
-            .padding(horizontal = AmakaSpacing.md.dp),
+            .padding(horizontal = AmakaSpacing.md.dp)
+            .testTag("exercise_list"),
         verticalArrangement = Arrangement.spacedBy(AmakaSpacing.md.dp)
     ) {
         // Header Card

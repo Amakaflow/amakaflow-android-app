@@ -5,6 +5,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -18,6 +19,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -74,7 +76,8 @@ fun WorkoutsScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
-                .background(AmakaColors.background),
+                .background(AmakaColors.background)
+                .testTag("workouts_screen"),
             contentPadding = PaddingValues(horizontal = AmakaSpacing.md.dp)
         ) {
             // Header
@@ -145,9 +148,10 @@ fun WorkoutsScreen(
                     Spacer(modifier = Modifier.height(AmakaSpacing.lg.dp))
                 }
             } else {
-                items(uiState.workouts) { workout ->
+                itemsIndexed(uiState.workouts) { index, workout ->
                     WorkoutListItem(
                         workout = workout,
+                        index = index,
                         onClick = { onNavigateToWorkoutDetail(workout.id) }
                     )
                     Spacer(modifier = Modifier.height(AmakaSpacing.sm.dp))
@@ -224,13 +228,15 @@ private fun EmptyStateCard(
 @Composable
 private fun WorkoutListItem(
     workout: Workout,
+    index: Int,
     onClick: () -> Unit
 ) {
     Surface(
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(AmakaCornerRadius.md.dp))
-            .clickable(onClick = onClick),
+            .clickable(onClick = onClick)
+            .testTag("workout_item_$index"),
         color = AmakaColors.surface,
         shape = RoundedCornerShape(AmakaCornerRadius.md.dp)
     ) {

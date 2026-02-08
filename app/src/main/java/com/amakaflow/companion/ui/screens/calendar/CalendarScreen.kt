@@ -17,6 +17,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -47,6 +48,7 @@ fun CalendarScreen(
         modifier = Modifier
             .fillMaxSize()
             .background(AmakaColors.background)
+            .testTag("calendar_screen")
     ) {
         // Header with title and action buttons
         Row(
@@ -159,7 +161,8 @@ fun CalendarScreen(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = AmakaSpacing.md.dp),
+                .padding(horizontal = AmakaSpacing.md.dp)
+                .testTag("calendar_view"),
             horizontalArrangement = Arrangement.SpaceEvenly
         ) {
             for (i in 0..6) {
