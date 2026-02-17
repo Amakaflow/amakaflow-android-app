@@ -45,6 +45,50 @@ jobs:
         if: always() && steps.build.outcome == 'success'
         run: ./gradlew lintDebug
 
+      # ============================================
+      # Maestro E2E Tests (AMA-622)
+      # ============================================
+      - name: Run Maestro E2E Smoke
+        id: maestro
+        timeout-minutes: 15
+        if: always() && steps.build.outcome == 'success'
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 34
+          arch: x86_64
+          target: google_apis
+          profile: Nexus 6
+          emulator-options: -no-window -no-audio -no-boot-anim
+          working-directory: .
+          script: |
+            # Wait for emulator to boot
+            adb wait-for-device shell getprop sys.boot_completed
+            
+            # Install the debug APK
+            adb install app/build/outputs/apk/debug/app-debug.apk
+            
+            # Install Maestro CLI
+            curl -sL https://get.maestro.mobile.dev | bash
+            export PATH="$HOME/.maestro/bin:$PATH"
+            
+            # Checkout Maestro flows from amakaflow-automation
+            cd /tmp
+            rm -rf amakaflow-automation
+            git clone --depth 1 https://github.com/supergeri/amakaflow-automation.git
+            
+            # Run Maestro smoke test
+            cd amakaflow-automation
+            maestro test flows/android/smoke.yaml --env UITEST_AUTH_SECRET="test-secret-123" --env UITEST_USER_ID="ci-test-user"
+
+      - name: Upload Maestro Screenshots
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: maestro-screenshots
+          path: flows/android/artifacts/screenshots/
+          retention-days: 7
+          if-no-files-found: ignore
+
       - name: Determine outcome
         if: always()
         id: outcome
@@ -58,6 +102,9 @@ jobs:
           elif [ "${{ steps.lint.outcome }}" == "failure" ]; then
             echo "ci_outcome=failure" >> "$GITHUB_OUTPUT"
             echo "failed_step=lint" >> "$GITHUB_OUTPUT"
+          elif [ "${{ steps.maestro.outcome }}" == "failure" ]; then
+            echo "ci_outcome=failure" >> "$GITHUB_OUTPUT"
+            echo "failed_step=maestro" >> "$GITHUB_OUTPUT"
           else
             echo "ci_outcome=success" >> "$GITHUB_OUTPUT"
             echo "failed_step=" >> "$GITHUB_OUTPUT"
@@ -119,6 +166,8 @@ jobs:
             fi
           elif [ "$FAILED" == "lint" ]; then
             LOGS="Lint check failed. Check workflow run for full output."
+          elif [ "$FAILED" == "maestro" ]; then
+            LOGS="Maestro E2E tests failed. Check workflow run for full output."
           fi
 
           {
