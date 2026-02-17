@@ -1,0 +1,157 @@
+name: Agent Validation Gate
+
+on:
+  push:
+    branches: ['agent/**']
+
+concurrency:
+  group: agent-validation-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: gradle
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      - name: Build
+        id: build
+        timeout-minutes: 10
+        run: ./gradlew assembleDebug
+
+      - name: Run Unit Tests
+        id: tests
+        timeout-minutes: 10
+        if: always() && steps.build.outcome == 'success'
+        run: ./gradlew testDebugUnitTest
+
+      - name: Run Lint
+        id: lint
+        timeout-minutes: 5
+        if: always() && steps.build.outcome == 'success'
+        run: ./gradlew lintDebug
+
+      - name: Determine outcome
+        if: always()
+        id: outcome
+        run: |
+          if [ "${{ steps.build.outcome }}" == "failure" ]; then
+            echo "ci_outcome=failure" >> "$GITHUB_OUTPUT"
+            echo "failed_step=build" >> "$GITHUB_OUTPUT"
+          elif [ "${{ steps.tests.outcome }}" == "failure" ]; then
+            echo "ci_outcome=failure" >> "$GITHUB_OUTPUT"
+            echo "failed_step=test" >> "$GITHUB_OUTPUT"
+          elif [ "${{ steps.lint.outcome }}" == "failure" ]; then
+            echo "ci_outcome=failure" >> "$GITHUB_OUTPUT"
+            echo "failed_step=lint" >> "$GITHUB_OUTPUT"
+          else
+            echo "ci_outcome=success" >> "$GITHUB_OUTPUT"
+            echo "failed_step=" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Generate test summary
+        if: always()
+        id: summary
+        run: |
+          SUMMARY=""
+          RESULTS_DIR="app/build/test-results/testDebugUnitTest"
+
+          if [ -d "$RESULTS_DIR" ]; then
+            TESTS=0
+            FAILURES=0
+            ERRORS=0
+            SKIPPED=0
+
+            for xml in "$RESULTS_DIR"/*.xml; do
+              [ -f "$xml" ] || continue
+              T=$(grep -oP 'tests="\K[0-9]+' "$xml" | head -1)
+              F=$(grep -oP 'failures="\K[0-9]+' "$xml" | head -1)
+              E=$(grep -oP 'errors="\K[0-9]+' "$xml" | head -1)
+              S=$(grep -oP 'skipped="\K[0-9]+' "$xml" | head -1)
+              TESTS=$((TESTS + ${T:-0}))
+              FAILURES=$((FAILURES + ${F:-0}))
+              ERRORS=$((ERRORS + ${E:-0}))
+              SKIPPED=$((SKIPPED + ${S:-0}))
+            done
+
+            PASSED=$((TESTS - FAILURES - ERRORS - SKIPPED))
+            SUMMARY="**Tests:** ${PASSED} passed, ${FAILURES} failed, ${ERRORS} errors, ${SKIPPED} skipped (${TESTS} total)"
+          else
+            SUMMARY="No test results found."
+          fi
+
+          {
+            echo "markdown<<EOF"
+            echo "$SUMMARY"
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Capture failure logs
+        if: always() && steps.outcome.outputs.ci_outcome == 'failure'
+        id: failure-logs
+        run: |
+          LOGS=""
+          FAILED="${{ steps.outcome.outputs.failed_step }}"
+
+          if [ "$FAILED" == "build" ]; then
+            LOGS="Build failed. Check workflow run for full output."
+          elif [ "$FAILED" == "test" ]; then
+            RESULTS_DIR="app/build/test-results/testDebugUnitTest"
+            if [ -d "$RESULTS_DIR" ]; then
+              LOGS=$(grep -h '<failure' "$RESULTS_DIR"/*.xml 2>/dev/null | head -20 | sed 's/<[^>]*>//g' | head -c 2000)
+            fi
+            if [ -z "$LOGS" ]; then
+              LOGS="Unit tests failed. Check workflow run for full output."
+            fi
+          elif [ "$FAILED" == "lint" ]; then
+            LOGS="Lint check failed. Check workflow run for full output."
+          fi
+
+          {
+            echo "logs<<EOF"
+            echo "$LOGS"
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Upload Test Results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: agent-test-results
+          path: app/build/test-results/
+          retention-days: 7
+          if-no-files-found: ignore
+
+      - name: Upload Lint Results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: agent-lint-results
+          path: app/build/reports/lint-results-debug.html
+          retention-days: 7
+          if-no-files-found: ignore
+
+      - name: Validation Gate
+        if: always()
+        uses: supergeri/amakaflow-automation/.github/actions/validation-gate@main
+        with:
+          linear-api-key: ${{ secrets.LINEAR_API_KEY }}
+          repo-name: amakaflow-android-app
+          ci-outcome: ${{ steps.outcome.outputs.ci_outcome }}
+          failed-step: ${{ steps.outcome.outputs.failed_step }}
+          failure-logs: ${{ steps.failure-logs.outputs.logs }}
+          test-results-summary: ${{ steps.summary.outputs.markdown }}
