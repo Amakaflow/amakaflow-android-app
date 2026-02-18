@@ -6,6 +6,7 @@ plugins {
     alias(libs.plugins.hilt)
     alias(libs.plugins.ksp)
     alias(libs.plugins.kover)
+    // alias(libs.plugins.sentry)
 }
 
 android {
@@ -28,6 +29,11 @@ android {
         buildConfigField("String", "INGESTOR_API_URL_PROD", "\"https://workout-ingestor-api.staging.amakaflow.com\"")
         buildConfigField("String", "INGESTOR_API_URL_STAGING", "\"https://workout-ingestor-api.staging.amakaflow.com\"")
         buildConfigField("String", "INGESTOR_API_URL_DEV", "\"http://10.0.2.2:8002\"")
+        
+        // Sentry DSN - configured per build variant via environment or build config
+        val sentryDsn = System.getenv("SENTRY_DSN")?.takeIf { it.isNotBlank() }
+            ?: "https://placeholder@o1.ingest.sentry.io/0"
+        buildConfigField("String", "SENTRY_DSN", "\"$sentryDsn\"")
     }
 
     buildTypes {
@@ -179,4 +185,18 @@ dependencies {
     kspAndroidTest(libs.hilt.compiler)
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
+
+    // Sentry for error tracking
+    implementation(libs.sentry.android)
 }
+
+// Configure Sentry
+// sentry {
+    // Upload ProGuard mappings and source context for readable stack traces
+//     includeSourceContext = true
+//     org = "amakaflow"
+//     projectName = "amakaflow-android-app"
+    
+    // Auth token should be set via SENTRY_AUTH_TOKEN environment variable
+    // For CI/CD, use GitHub Actions secrets
+// }

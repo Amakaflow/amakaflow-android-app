@@ -9,6 +9,8 @@ import com.amakaflow.companion.data.sync.CompletionSyncWorker
 import com.amakaflow.companion.debug.DebugLog
 import com.amakaflow.companion.debug.GlobalExceptionHandler
 import dagger.hilt.android.HiltAndroidApp
+import io.sentry.Sentry
+import io.sentry.SentryOptions
 import javax.inject.Inject
 
 @HiltAndroidApp
@@ -23,6 +25,9 @@ class AmakaFlowApplication : Application(), Configuration.Provider {
 
     override fun onCreate() {
         super.onCreate()
+
+        // Initialize Sentry for error tracking
+        initializeSentry()
 
         // Install global exception handler for crash logging
         GlobalExceptionHandler.install()
@@ -40,6 +45,38 @@ class AmakaFlowApplication : Application(), Configuration.Provider {
         // Schedule periodic completion sync
         CompletionSyncWorker.schedulePeriodicSync(this)
         DebugLog.debug("Completion sync worker scheduled", "App")
+    }
+
+    private fun initializeSentry() {
+        val dsn = BuildConfig.SENTRY_DSN
+        
+        Sentry.init { options ->
+            options.dsn = dsn
+            options.environment = BuildConfig.DEFAULT_ENVIRONMENT
+            
+            // Performance monitoring
+            options.tracesSampleRate = 1.0 // 100% for now, adjust for production
+            
+            // ANR detection is enabled by default in Sentry Android SDK 7.x
+
+            // Data filtering - filter out sensitive data
+            options.isAttachServerName = false
+            options.isAttachThreads = true
+            options.isAttachStacktrace = true
+            
+            // Release tracking
+            options.release = "com.amakaflow.companion@${BuildConfig.VERSION_NAME}+${BuildConfig.VERSION_CODE}"
+            
+            // Set common tags
+            options.tags["app.version"] = BuildConfig.VERSION_NAME
+            options.tags["app.version.code"] = BuildConfig.VERSION_CODE.toString()
+            options.tags["build.type"] = BuildConfig.BUILD_TYPE
+            
+            // Enable debug in debug builds
+            options.setDebug(BuildConfig.DEBUG)
+        }
+        
+        DebugLog.info("Sentry initialized with DSN: ${dsn.take(20)}...", "Sentry")
     }
 
     override val workManagerConfiguration: Configuration
