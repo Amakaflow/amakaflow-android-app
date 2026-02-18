@@ -46,6 +46,9 @@ jobs:
           KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
           KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+          SENTRY_ORG: amakaflow
+          SENTRY_PROJECT: amakaflow-android-app
         run: |
           ./gradlew bundleRelease \
             -Pandroid.injected.signing.store.file=$PWD/app/release.keystore \
@@ -61,3 +64,12 @@ jobs:
           releaseFiles: app/build/outputs/bundle/release/app-release.aab
           track: ${{ github.event.inputs.track || 'internal' }}
           status: draft
+
+      - name: Upload ProGuard mappings to Sentry
+        if: env.SENTRY_AUTH_TOKEN != ''
+        uses: sentry/upload-release-assets@v1
+        with:
+          org: amakaflow
+          project: amakaflow-android-app
+          release: ${{ github.ref_name }}
+          assets: app/build/outputs/mapping/release/mapping.txt
