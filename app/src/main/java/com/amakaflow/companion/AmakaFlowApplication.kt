@@ -58,8 +58,8 @@ class AmakaFlowApplication : Application(), Configuration.Provider {
             options.tracesSampleRate = 1.0 // 100% for now, adjust for production
             
             // Session tracking
-            options.anrEnabled = true
-            options.anrTimeoutIntervalMs = 5000
+            options.isAnrEnabled = true
+            options.anrTimeoutIntervalMillis = 5000
             
             // Data filtering - filter out sensitive data
             options.isAttachServerName = false
@@ -75,7 +75,7 @@ class AmakaFlowApplication : Application(), Configuration.Provider {
             options.tags["build.type"] = BuildConfig.BUILD_TYPE
             
             // Enable debug in debug builds
-            options.debug = BuildConfig.DEBUG
+            options.setDebug(BuildConfig.DEBUG)
         }
         
         DebugLog.info("Sentry initialized with DSN: ${dsn.take(20)}...", "Sentry")

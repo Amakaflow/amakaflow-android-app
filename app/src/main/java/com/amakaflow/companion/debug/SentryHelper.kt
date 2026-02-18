@@ -5,7 +5,7 @@ import com.amakaflow.companion.data.AppEnvironment
 import dagger.hilt.android.qualifiers.ApplicationContext
 import io.sentry.Sentry
 import io.sentry.SpanStatus
-import io.sentry.User
+import io.sentry.protocol.User
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -160,8 +160,7 @@ class SentryHelper @Inject constructor(
             val envName = when (environment) {
                 AppEnvironment.PRODUCTION -> "prod"
                 AppEnvironment.STAGING -> "staging"
-                AppEnvironment.DEV -> "dev"
-                AppEnvironment.TEST -> "test"
+                AppEnvironment.DEVELOPMENT -> "dev"
             }
             Sentry.setTag("environment", envName)
         }
@@ -203,7 +202,9 @@ class SentryHelper @Inject constructor(
          * Add context data that will be attached to all events.
          */
         fun setContext(name: String, data: Map<String, Any>) {
-            Sentry.setContext(name, data)
+            Sentry.configureScope { scope ->
+                scope.setContexts(name, data)
+            }
         }
 
         /**
