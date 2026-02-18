@@ -31,10 +31,9 @@ android {
         buildConfigField("String", "INGESTOR_API_URL_DEV", "\"http://10.0.2.2:8002\"")
         
         // Sentry DSN - configured per build variant via environment or build config
-        // Set via SENTRY_DSN environment variable or use placeholder defaults
-        buildConfigField("String", "SENTRY_DSN", 
-            "(System.getenv(\"SENTRY_DSN\") ?: \"\").takeIf { it.isNotBlank() } " +
-            "?: \"https://placeholder@o1.ingest.sentry.io/0\"")
+        val sentryDsn = System.getenv("SENTRY_DSN")?.takeIf { it.isNotBlank() }
+            ?: "https://placeholder@o1.ingest.sentry.io/0"
+        buildConfigField("String", "SENTRY_DSN", "\"$sentryDsn\"")
     }
 
     buildTypes {
