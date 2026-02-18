@@ -33,20 +33,17 @@ class WorkoutModelTest {
     @Test
     fun workout_creation_with_intervals() {
         val intervals = listOf(
-            WorkoutInterval.Exercise(
-                name = "Warmup",
-                durationSeconds = 300,
-                repetitions = 1
+            WorkoutInterval.Warmup(
+                seconds = 300,
+                target = "Warmup"
             ),
-            WorkoutInterval.Exercise(
-                name = "Running",
-                durationSeconds = 1200,
-                repetitions = 1
+            WorkoutInterval.Time(
+                seconds = 1200,
+                target = "Running"
             ),
-            WorkoutInterval.Exercise(
-                name = "Cooldown",
-                durationSeconds = 300,
-                repetitions = 1
+            WorkoutInterval.Cooldown(
+                seconds = 300,
+                target = "Cooldown"
             )
         )
 
@@ -68,10 +65,9 @@ class WorkoutModelTest {
             WorkoutInterval.Repeat(
                 reps = 3,
                 intervals = listOf(
-                    WorkoutInterval.Exercise(
-                        name = "Burpee",
-                        durationSeconds = 60,
-                        repetitions = 1
+                    WorkoutInterval.Time(
+                        seconds = 60,
+                        target = "Burpee"
                     )
                 )
             )
@@ -99,7 +95,7 @@ class WorkoutModelTest {
             name = "Test Workout",
             sport = WorkoutSport.STRENGTH,
             duration = 3600,
-            source = WorkoutSource.AMA,
+            source = WorkoutSource.AMAKA,
             description = "A test workout"
         )
 
@@ -116,22 +112,18 @@ class WorkoutModelTest {
             WorkoutInterval.Repeat(
                 reps = 2,
                 intervals = listOf(
-                    WorkoutInterval.Exercise(
-                        name = "Sprint",
-                        durationSeconds = 30,
-                        repetitions = 1
+                    WorkoutInterval.Time(
+                        seconds = 30,
+                        target = "Sprint"
                     ),
-                    WorkoutInterval.Exercise(
-                        name = "Rest",
-                        durationSeconds = 30,
-                        repetitions = 1
+                    WorkoutInterval.Rest(
+                        seconds = 30
                     )
                 )
             ),
-            WorkoutInterval.Exercise(
-                name = "Cooldown",
-                durationSeconds = 300,
-                repetitions = 1
+            WorkoutInterval.Cooldown(
+                seconds = 300,
+                target = "Cooldown"
             )
         )
 
@@ -166,10 +158,9 @@ class WorkoutModelTest {
     @Test
     fun workout_single_interval() {
         val intervals = listOf(
-            WorkoutInterval.Exercise(
-                name = "Plank",
-                durationSeconds = 60,
-                repetitions = 1
+            WorkoutInterval.Time(
+                seconds = 60,
+                target = "Plank"
             )
         )
 
@@ -232,7 +223,7 @@ class WorkoutModelTest {
         val workout = Workout(
             id = "workout-10",
             name = "YouTube Workout",
-            sport = WorkoutSport.YOGA,
+            sport = WorkoutSport.MOBILITY,
             duration = 2700,
             source = WorkoutSource.YOUTUBE,
             sourceUrl = "https://youtube.com/watch?v=abc123"
