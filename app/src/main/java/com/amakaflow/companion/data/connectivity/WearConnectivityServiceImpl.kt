@@ -1,5 +1,6 @@
 package com.amakaflow.companion.data.connectivity
 
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -11,6 +12,8 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 import java.util.UUID
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -24,6 +27,8 @@ class WearConnectivityServiceImpl @Inject constructor() : WearConnectivityServic
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     
+    private val json = Json { ignoreUnknownKeys = true }
+
     private val _connectionState = MutableStateFlow<WearConnectionState>(WearConnectionState.Disconnected)
     override val connectionState: StateFlow<WearConnectionState> = _connectionState.asStateFlow()
 
@@ -47,6 +52,8 @@ class WearConnectivityServiceImpl @Inject constructor() : WearConnectivityServic
             _connectionState.value = WearConnectionState.Connected
             retryCount = 0
             true
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
             _connectionState.value = WearConnectionState.Error(e.message ?: "Connection failed")
             false
@@ -67,16 +74,19 @@ class WearConnectivityServiceImpl @Inject constructor() : WearConnectivityServic
             // Simulate message sending delay
             delay(50)
             true
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
             false
         }
     }
 
     override suspend fun sendWorkoutStart(workoutId: String, workoutName: String): Boolean {
+        val payload = json.encodeToString(mapOf("workoutId" to workoutId, "workoutName" to workoutName))
         val message = WearMessage(
             id = UUID.randomUUID().toString(),
             type = MessageType.WORKOUT_START,
-            payload = """{"workoutId": "$workoutId", "workoutName": "$workoutName"}"""
+            payload = payload
         )
         return sendMessage(message)
     }
@@ -109,10 +119,11 @@ class WearConnectivityServiceImpl @Inject constructor() : WearConnectivityServic
     }
 
     override suspend fun sendHeartRateUpdate(heartRate: Int): Boolean {
+        val payload = json.encodeToString(mapOf("heartRate" to heartRate))
         val message = WearMessage(
             id = UUID.randomUUID().toString(),
             type = MessageType.HEART_RATE_UPDATE,
-            payload = """{"heartRate": $heartRate}"""
+            payload = payload
         )
         return sendMessage(message)
     }
@@ -132,6 +143,8 @@ class WearConnectivityServiceImpl @Inject constructor() : WearConnectivityServic
                 if (connect()) {
                     return true
                 }
+            } catch (e: CancellationException) {
+                throw e
             } catch (e: Exception) {
                 _connectionState.value = WearConnectionState.Error(e.message ?: "Reconnection failed")
             }

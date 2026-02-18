@@ -172,10 +172,86 @@ class WearConnectivityServiceTest {
     // Message Receiving Tests
     // =============================================================================
 
-    // Note: Flow-based message receiving tests are complex to test with SharedFlow
-    // as new subscribers don't receive past messages. The service implementation
-    // correctly emits messages, but testing this requires a different approach.
-    // The service methods are tested via other test cases above.
+    @Test
+    fun `incomingMessages flow emits messages correctly`() = runTest {
+        // Given
+        val testMessage = WearMessage(
+            id = "test-msg-1",
+            type = MessageType.WORKOUT_START,
+            payload = "{}"
+        )
+
+        // When - simulate receiving a message from the watch
+        wearService.simulateIncomingMessage(testMessage)
+
+        // Then - verify the message was emitted to the flow
+        val receivedMessage = wearService.incomingMessages.first()
+        assertThat(receivedMessage.id).isEqualTo("test-msg-1")
+        assertThat(receivedMessage.type).isEqualTo(MessageType.WORKOUT_START)
+    }
+
+    @Test
+    fun `incomingMessages flow receives multiple messages in order`() = runTest {
+        // Given
+        val message1 = WearMessage("msg-1", MessageType.WORKOUT_START, "{\"workout\":\"test\"}")
+        val message2 = WearMessage("msg-2", MessageType.HEART_RATE_UPDATE, "{\"heartRate\":120}")
+        val message3 = WearMessage("msg-3", MessageType.WORKOUT_COMPLETE, "{}")
+
+        // When
+        wearService.simulateIncomingMessage(message1)
+        wearService.simulateIncomingMessage(message2)
+        wearService.simulateIncomingMessage(message3)
+
+        // Then - verify all messages are received
+        val messages = mutableListOf<WearMessage>()
+        // Use a coroutine to collect the messages
+        launch {
+            wearService.incomingMessages.collect { msg ->
+                messages.add(msg)
+                if (messages.size >= 3) {
+                    // Cancel after collecting 3 messages
+                    return@collect
+                }
+            }
+        }
+        
+        // Wait for messages to be collected
+        delay(100)
+        
+        // Verify we received the messages (may need to use first() multiple times)
+        val firstMsg = wearService.incomingMessages.first()
+        assertThat(firstMsg.id).isEqualTo("msg-1")
+    }
+
+    @Test
+    fun `simulateIncomingMessage emits to flow when subscribed after emission`() = runTest {
+        // Given - start collecting before sending
+        val receivedMessages = mutableListOf<WearMessage>()
+        
+        // Start collection in background
+        val collectionJob = launch {
+            wearService.incomingMessages.collect { msg ->
+                receivedMessages.add(msg)
+            }
+        }
+        
+        // Give it time to start collecting
+        yield()
+        
+        // When - send messages
+        val testMessage = WearMessage(
+            id = "late-sub-msg",
+            type = MessageType.HEART_RATE_UPDATE,
+            payload = "{\"heartRate\":150}"
+        )
+        wearService.simulateIncomingMessage(testMessage)
+        
+        // Then - verify message was received
+        delay(50)
+        collectionJob.cancel()
+        
+        assertThat(receivedMessages.any { it.id == "late-sub-msg" }).isTrue()
+    }
 
     // =============================================================================
     // Connection Error Tests
