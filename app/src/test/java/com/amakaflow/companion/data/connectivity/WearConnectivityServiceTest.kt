@@ -185,9 +185,11 @@ class WearConnectivityServiceTest {
         wearService.simulateIncomingMessage(testMessage)
 
         // Then - verify the message was emitted to the flow
-        val receivedMessage = wearService.incomingMessages.first()
-        assertThat(receivedMessage.id).isEqualTo("test-msg-1")
-        assertThat(receivedMessage.type).isEqualTo(MessageType.WORKOUT_START)
+        // Use withTimeoutOrNull to avoid hanging on flow collection
+        val receivedMessage = withTimeoutOrNull(1000) { wearService.incomingMessages.first() }
+        assertThat(receivedMessage).isNotNull()
+        assertThat(receivedMessage?.id).isEqualTo("test-msg-1")
+        assertThat(receivedMessage?.type).isEqualTo(MessageType.WORKOUT_START)
     }
 
     @Test
@@ -197,30 +199,23 @@ class WearConnectivityServiceTest {
         val message2 = WearMessage("msg-2", MessageType.HEART_RATE_UPDATE, "{\"heartRate\":120}")
         val message3 = WearMessage("msg-3", MessageType.WORKOUT_COMPLETE, "{}")
 
-        // When
+        // When - emit all messages first
         wearService.simulateIncomingMessage(message1)
         wearService.simulateIncomingMessage(message2)
         wearService.simulateIncomingMessage(message3)
 
-        // Then - verify all messages are received
-        val messages = mutableListOf<WearMessage>()
-        // Use a coroutine to collect the messages
-        launch {
-            wearService.incomingMessages.collect { msg ->
-                messages.add(msg)
-                if (messages.size >= 3) {
-                    // Cancel after collecting 3 messages
-                    return@collect
-                }
-            }
-        }
-        
-        // Wait for messages to be collected
-        delay(100)
-        
-        // Verify we received the messages (may need to use first() multiple times)
+        // Then - verify all messages are received by collecting them
+        // Use first() on each subscription - each call gets the next value
         val firstMsg = wearService.incomingMessages.first()
         assertThat(firstMsg.id).isEqualTo("msg-1")
+        
+        // Note: In a SharedFlow, each collector gets its own copy of emitted values.
+        // For testing multiple messages, we emit them sequentially and check each one
+        val secondMsg = wearService.incomingMessages.first()
+        assertThat(secondMsg.id).isEqualTo("msg-2")
+        
+        val thirdMsg = wearService.incomingMessages.first()
+        assertThat(thirdMsg.id).isEqualTo("msg-3")
     }
 
     @Test
