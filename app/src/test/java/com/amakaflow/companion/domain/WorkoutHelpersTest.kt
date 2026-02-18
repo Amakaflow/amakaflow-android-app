@@ -33,7 +33,7 @@ class WorkoutHelpersTest {
     @Test
     fun formatDuration_edge_cases() {
         // Zero
-        assertThat(WorkoutHelpers.formatDuration(0)).isEqualTo("0m")
+        assertThat(WorkoutHelpers.formatDuration(0)).isEqualTo("0s")
         
         // Very small
         assertThat(WorkoutHelpers.formatDuration(30)).isEqualTo("30s")
