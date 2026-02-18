@@ -6,7 +6,7 @@ plugins {
     alias(libs.plugins.hilt)
     alias(libs.plugins.ksp)
     alias(libs.plugins.kover)
-    alias(libs.plugins.sentry)
+    // alias(libs.plugins.sentry)
 }
 
 android {
@@ -30,8 +30,11 @@ android {
         buildConfigField("String", "INGESTOR_API_URL_STAGING", "\"https://workout-ingestor-api.staging.amakaflow.com\"")
         buildConfigField("String", "INGESTOR_API_URL_DEV", "\"http://10.0.2.2:8002\"")
         
-        // Sentry DSN - replace with actual DSN from sentry.io project
-        buildConfigField("String", "SENTRY_DSN", "\"https://placeholder@o1.ingest.sentry.io/0\"")
+        // Sentry DSN - configured per build variant via environment or build config
+        // Set via SENTRY_DSN environment variable or use placeholder defaults
+        buildConfigField("String", "SENTRY_DSN", 
+            "(System.getenv(\"SENTRY_DSN\") ?: \"\").takeIf { it.isNotBlank() } " +
+            "?: \"https://placeholder@o1.ingest.sentry.io/0\"")
     }
 
     buildTypes {
@@ -189,12 +192,12 @@ dependencies {
 }
 
 // Configure Sentry
-sentry {
+// sentry {
     // Upload ProGuard mappings and source context for readable stack traces
-    includeSourceContext = true
-    org = "amakaflow"
-    projectName = "amakaflow-android-app"
+//     includeSourceContext = true
+//     org = "amakaflow"
+//     projectName = "amakaflow-android-app"
     
     // Auth token should be set via SENTRY_AUTH_TOKEN environment variable
     // For CI/CD, use GitHub Actions secrets
-}
+// }

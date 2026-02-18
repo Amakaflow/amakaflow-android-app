@@ -38,6 +38,7 @@ import javax.inject.Singleton
  *        // code to measure
  *    }
  */
+@Suppress("UNUSED_PARAMETER")
 @Singleton
 class SentryHelper @Inject constructor(
     @ApplicationContext private val context: Context
@@ -53,7 +54,9 @@ class SentryHelper @Inject constructor(
          */
         fun captureException(throwable: Throwable, contextMessage: String? = null) {
             if (contextMessage != null) {
-                Sentry.captureMessage(contextMessage, throwable)
+                // Capture both the message and the exception
+                Sentry.captureException(throwable)
+                Sentry.captureMessage(contextMessage, io.sentry.SentryLevel.ERROR)
             } else {
                 Sentry.captureException(throwable)
             }
@@ -83,9 +86,9 @@ class SentryHelper @Inject constructor(
             breadcrumb.type = "default"
             
             data?.let {
-                it.forEach((key, value) ->
+                it.forEach { (key, value) ->
                     breadcrumb.setData(key, value.toString())
-                })
+                }
             }
             
             Sentry.addBreadcrumb(breadcrumb)
@@ -100,6 +103,8 @@ class SentryHelper @Inject constructor(
          * @param deviceId Paired device identifier
          */
         fun setUser(userId: String, email: String? = null, deviceId: String? = null) {
+            if (userId.isBlank()) return
+            
             val user = User()
             user.id = userId
             email?.let { user.email = it }
