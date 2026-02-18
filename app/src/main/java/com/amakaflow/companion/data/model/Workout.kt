@@ -224,11 +224,12 @@ object WorkoutHelpers {
     fun formatDuration(seconds: Int): String {
         val hours = seconds / 3600
         val minutes = (seconds % 3600) / 60
+        val secs = seconds % 60
 
-        return if (hours > 0) {
-            "${hours}h ${minutes}m"
-        } else {
-            "${minutes}m"
+        return when {
+            hours > 0 -> "${hours}h ${minutes}m"
+            minutes > 0 -> "${minutes}m"
+            else -> "${secs}s"
         }
     }
 
@@ -255,16 +256,14 @@ object WorkoutHelpers {
     }
 
     fun formatTime(seconds: Int): String {
-        return if (seconds >= 60) {
-            val minutes = seconds / 60
-            val secs = seconds % 60
-            if (secs > 0) {
-                "${minutes}m ${secs}s"
-            } else {
-                "${minutes} min"
-            }
-        } else {
-            "${seconds}s"
+        val hours = seconds / 3600
+        val minutes = (seconds % 3600) / 60
+        val secs = seconds % 60
+
+        return when {
+            hours > 0 -> if (secs > 0) "${hours}h ${minutes}m ${secs}s" else "${hours}h ${minutes}m"
+            minutes > 0 -> if (secs > 0) "${minutes}m ${secs}s" else "${minutes} min"
+            else -> "${secs}s"
         }
     }
 }
