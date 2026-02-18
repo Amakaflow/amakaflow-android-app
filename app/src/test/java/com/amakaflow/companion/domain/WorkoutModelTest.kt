@@ -87,8 +87,9 @@ class WorkoutModelTest {
         )
 
         assertThat(workout.intervals).hasSize(1)
-        val repeat = workout.intervals[0] as WorkoutInterval.Repeat
-        assertThat(repeat.reps).isEqualTo(3)
+        val repeat = workout.intervals[0] as? WorkoutInterval.Repeat
+        assertThat(repeat).isNotNull()
+        assertThat(repeat?.reps).isEqualTo(3)
     }
 
     @Test

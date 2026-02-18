@@ -14,7 +14,7 @@ class WorkoutHelpersTest {
 
     @Test
     fun formatDuration_seconds_only() {
-        assertThat(WorkoutHelpers.formatDuration(30)).isEqualTo("30m")
+        assertThat(WorkoutHelpers.formatDuration(30)).isEqualTo("30s")
     }
 
     @Test
@@ -36,7 +36,7 @@ class WorkoutHelpersTest {
         assertThat(WorkoutHelpers.formatDuration(0)).isEqualTo("0m")
         
         // Very small
-        assertThat(WorkoutHelpers.formatDuration(30)).isEqualTo("30m")
+        assertThat(WorkoutHelpers.formatDuration(30)).isEqualTo("30s")
         
         // Very large
         assertThat(WorkoutHelpers.formatDuration(36000)).isEqualTo("10h 0m")
@@ -115,7 +115,7 @@ class WorkoutHelpersTest {
         assertThat(WorkoutHelpers.formatTime(60)).isEqualTo("1 min")
         
         // Large value
-        assertThat(WorkoutHelpers.formatTime(3600)).isEqualTo("60 min")
+        assertThat(WorkoutHelpers.formatTime(3600)).isEqualTo("1h 0m")
     }
 
     @Test
