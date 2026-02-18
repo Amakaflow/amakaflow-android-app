@@ -181,33 +181,64 @@ class WearConnectivityServiceTest {
             payload = "{}"
         )
 
-        // Start collecting first (to establish subscription before emitting)
-        val receivedMessage = wearService.incomingMessages.first()
-
+        // Use a channel to capture the received message
+        val receivedMessage = mutableListOf<WearMessage>()
+        
+        // Start collecting in background FIRST (before emitting)
+        val job = launch {
+            wearService.incomingMessages.collect { msg ->
+                receivedMessage.add(msg)
+            }
+        }
+        
+        // Yield to let the collection start
+        yield()
+        
         // When - simulate receiving a message from the watch
         wearService.simulateIncomingMessage(testMessage)
-
+        
+        // Wait for the message to be received
+        delay(100)
+        
         // Then - verify the message was emitted to the flow
-        assertThat(receivedMessage.id).isEqualTo("test-msg-1")
-        assertThat(receivedMessage.type).isEqualTo(MessageType.WORKOUT_START)
+        assertThat(receivedMessage).hasSize(1)
+        assertThat(receivedMessage[0].id).isEqualTo("test-msg-1")
+        assertThat(receivedMessage[0].type).isEqualTo(MessageType.WORKOUT_START)
+        
+        // Cleanup
+        job.cancel()
     }
 
     @Test
     fun `incomingMessages flow receives multiple messages in order`() = runTest {
         // Given - start collecting first
-        val firstMsg = wearService.incomingMessages.first()
-        val secondMsg = wearService.incomingMessages.first()
-        val thirdMsg = wearService.incomingMessages.first()
-
+        val receivedMessages = mutableListOf<WearMessage>()
+        
+        val job = launch {
+            wearService.incomingMessages.collect { msg ->
+                receivedMessages.add(msg)
+            }
+        }
+        
+        // Yield to let the collection start
+        yield()
+        
         // When - emit messages
         wearService.simulateIncomingMessage(WearMessage("msg-1", MessageType.WORKOUT_START, "{\"workout\":\"test\"}"))
         wearService.simulateIncomingMessage(WearMessage("msg-2", MessageType.HEART_RATE_UPDATE, "{\"heartRate\":120}"))
         wearService.simulateIncomingMessage(WearMessage("msg-3", MessageType.WORKOUT_COMPLETE, "{}"))
-
-        // Then - verify messages in order (replay=1 means each first() gets the next value)
-        assertThat(firstMsg.id).isEqualTo("msg-1")
-        assertThat(secondMsg.id).isEqualTo("msg-2")
-        assertThat(thirdMsg.id).isEqualTo("msg-3")
+        
+        // Wait for all messages to be collected
+        delay(100)
+        
+        // Then - verify all messages were received in order
+        assertThat(receivedMessages).hasSize(3)
+        assertThat(receivedMessages[0].id).isEqualTo("msg-1")
+        assertThat(receivedMessages[1].id).isEqualTo("msg-2")
+        assertThat(receivedMessages[2].id).isEqualTo("msg-3")
+        
+        // Cleanup
+        job.cancel()
     }
 
     @Test
