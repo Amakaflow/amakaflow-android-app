@@ -32,7 +32,7 @@ class WearConnectivityServiceImpl @Inject constructor() : WearConnectivityServic
     private val _connectionState = MutableStateFlow<WearConnectionState>(WearConnectionState.Disconnected)
     override val connectionState: StateFlow<WearConnectionState> = _connectionState.asStateFlow()
 
-    private val _incomingMessages = MutableSharedFlow<WearMessage>()
+    private val _incomingMessages = MutableSharedFlow<WearMessage>(replay = 1)
     override val incomingMessages: Flow<WearMessage> = _incomingMessages.asSharedFlow()
 
     private var isConnected = false
