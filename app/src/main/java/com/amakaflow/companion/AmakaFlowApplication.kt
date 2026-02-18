@@ -57,10 +57,8 @@ class AmakaFlowApplication : Application(), Configuration.Provider {
             // Performance monitoring
             options.tracesSampleRate = 1.0 // 100% for now, adjust for production
             
-            // Session tracking
-            options.isAnrEnabled = true
-            options.anrTimeoutIntervalMillis = 5000
-            
+            // ANR detection is enabled by default in Sentry Android SDK 7.x
+
             // Data filtering - filter out sensitive data
             options.isAttachServerName = false
             options.isAttachThreads = true
