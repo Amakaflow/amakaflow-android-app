@@ -86,7 +86,7 @@ jobs:
             echo "has_failures=true" >> "$GITHUB_OUTPUT"
             {
               echo "failures<<FAILURES_EOF"
-              printf "%b" "$FAILURES"
+              printf "%b\n" "$FAILURES"
               echo "FAILURES_EOF"
             } >> "$GITHUB_OUTPUT"
           else
