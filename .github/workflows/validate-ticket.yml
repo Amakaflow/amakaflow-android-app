@@ -19,7 +19,6 @@ jobs:
           LINEAR_API_KEY: ${{ secrets.LINEAR_API_KEY }}
           BRANCH: ${{ github.head_ref }}
         run: |
-          # Extract AMA-NNN from branch name (e.g. feature/AMA-668-some-title → AMA-668)
           TICKET_ID=$(echo "$BRANCH" | grep -oE 'AMA-[0-9]+' | head -1)
 
           if [[ -z "$TICKET_ID" ]]; then
@@ -32,7 +31,6 @@ jobs:
           echo "ticket_id=$TICKET_ID" >> "$GITHUB_OUTPUT"
           echo "skip=false" >> "$GITHUB_OUTPUT"
 
-          # Fetch ticket description from Linear GraphQL API
           QUERY=$(jq -n --argjson num "$TICKET_NUMBER" \
             '{"query": "{ issues(filter: { number: { eq: \($num) } }) { nodes { identifier description } } }"}')
 
@@ -46,8 +44,9 @@ jobs:
           data = json.load(sys.stdin)
           data_block = data.get('data') or {}
           nodes = data_block.get('issues', {}).get('nodes', [])
-          print(nodes[0]['description'] if nodes else '')
-          ")
+          desc = nodes[0].get('description') if nodes else None
+          print(desc if desc else '')
+          " 2>/dev/null)
 
           if [[ -z "$DESCRIPTION" ]]; then
             echo "Could not fetch $TICKET_ID from Linear — skipping"
@@ -72,9 +71,9 @@ jobs:
             FAILURES="${FAILURES}\n- Missing \`## Acceptance Criteria\` section"
           fi
 
-          # Check 4: Checkboxes
-          if ! echo "$DESCRIPTION" | grep -qF '- [ ]'; then
-            FAILURES="${FAILURES}\n- Acceptance criteria has no \`- [ ]\` checkboxes"
+          # Check 4: Checkboxes (Linear API may render as - [ ], * [ ], - [x], or * [x])
+          if ! echo "$DESCRIPTION" | grep -qE '[-*] \[[ x]\]'; then
+            FAILURES="${FAILURES}\n- Acceptance criteria has no checkboxes (\`- [ ]\`)"
           fi
 
           # Check 5: Test command
