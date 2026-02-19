@@ -2,10 +2,10 @@ package com.amakaflow.companion.domain.usecase.completion
 
 import com.amakaflow.companion.data.model.CompletionSource
 import com.amakaflow.companion.data.model.HealthMetrics
+import com.amakaflow.companion.data.model.WorkoutCompletionSaveResponse
 import com.amakaflow.companion.data.model.WorkoutCompletionSubmission
 import com.amakaflow.companion.domain.Result
 import com.amakaflow.companion.domain.repository.CompletionRepository
-import com.amakaflow.companion.test.TestFixtures
 import com.google.common.truth.Truth.assertThat
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -47,8 +47,8 @@ class SubmitCompletionUseCaseTest {
     fun `invoke returns Success when submission succeeds`() = runTest {
         // Given
         val submission = createSubmission()
-        val completion = TestFixtures.sampleCompletion
-        coEvery { mockRepository.submitCompletion(submission) } returns Result.Success(completion)
+        val saveResponse = WorkoutCompletionSaveResponse(success = true, id = "completion-001")
+        coEvery { mockRepository.submitCompletion(submission) } returns Result.Success(saveResponse)
 
         // When
         val result = useCase(submission)
@@ -81,7 +81,9 @@ class SubmitCompletionUseCaseTest {
             avgHeartRate = 120,
             activeCalories = 250
         )
-        coEvery { mockRepository.submitCompletion(submission) } returns Result.Success(TestFixtures.strengthCompletion)
+        coEvery { mockRepository.submitCompletion(submission) } returns Result.Success(
+            WorkoutCompletionSaveResponse(success = true, id = "completion-002")
+        )
 
         // When
         useCase(submission)

@@ -460,6 +460,17 @@ data class PushedWorkoutsResponse(
 )
 
 /**
+ * AMA-323: Response from POST /workouts/complete.
+ * The API returns {"success": true, "id": "...", "summary": {...}} — NOT a full WorkoutCompletion.
+ */
+@Serializable
+data class WorkoutCompletionSaveResponse(
+    val success: Boolean,
+    val id: String? = null
+    // summary is intentionally omitted — ignoreUnknownKeys = true handles the field safely
+)
+
+/**
  * Single workout response wrapper
  */
 @Serializable

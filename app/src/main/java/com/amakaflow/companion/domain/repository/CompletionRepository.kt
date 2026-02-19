@@ -3,6 +3,7 @@ package com.amakaflow.companion.domain.repository
 import com.amakaflow.companion.data.local.PendingCompletionEntity
 import com.amakaflow.companion.data.model.WorkoutCompletion
 import com.amakaflow.companion.data.model.WorkoutCompletionDetail
+import com.amakaflow.companion.data.model.WorkoutCompletionSaveResponse
 import com.amakaflow.companion.data.model.WorkoutCompletionSubmission
 import com.amakaflow.companion.domain.Result
 import kotlinx.coroutines.flow.Flow
@@ -33,8 +34,9 @@ interface CompletionRepository {
     /**
      * Submit a workout completion.
      * Attempts immediate submission; queues for later if offline or failed.
+     * AMA-323: Returns WorkoutCompletionSaveResponse (the actual API shape), not WorkoutCompletion.
      */
-    suspend fun submitCompletion(submission: WorkoutCompletionSubmission): Result<WorkoutCompletion>
+    suspend fun submitCompletion(submission: WorkoutCompletionSubmission): Result<WorkoutCompletionSaveResponse>
 
     /**
      * Queue a completion for later submission.

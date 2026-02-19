@@ -4,8 +4,8 @@ import android.content.Context
 import com.amakaflow.companion.data.api.AmakaflowApi
 import com.amakaflow.companion.data.local.PendingCompletionDao
 import com.amakaflow.companion.data.local.PendingCompletionEntity
-import com.amakaflow.companion.data.model.WorkoutCompletion
 import com.amakaflow.companion.data.model.WorkoutCompletionDetail
+import com.amakaflow.companion.data.model.WorkoutCompletionSaveResponse
 import com.amakaflow.companion.data.model.WorkoutCompletionSubmission
 import com.amakaflow.companion.data.sync.CompletionSyncWorker
 import com.amakaflow.companion.domain.Result
@@ -67,7 +67,10 @@ class CompletionRepositoryImpl @Inject constructor(
      * Submit a workout completion.
      * If online, attempts immediate submission. If offline or failed, queues for later sync.
      */
-    override suspend fun submitCompletion(submission: WorkoutCompletionSubmission): Result<WorkoutCompletion> {
+    // AMA-323: Return type corrected from Result<WorkoutCompletion> to Result<WorkoutCompletionSaveResponse>.
+    // POST /workouts/complete returns {"success": true, "id": "...", "summary": {...}} — not a full WorkoutCompletion.
+    // The mismatch caused deserialization to always throw, queuing every completion as "pending" even on success.
+    override suspend fun submitCompletion(submission: WorkoutCompletionSubmission): Result<WorkoutCompletionSaveResponse> {
         return try {
             // Try immediate submission
             val response = api.completeWorkout(submission)

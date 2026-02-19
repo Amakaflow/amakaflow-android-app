@@ -7,8 +7,8 @@ import com.amakaflow.companion.data.local.WorkoutEntityMapper
 import com.amakaflow.companion.data.model.ConfirmSyncRequest
 import com.amakaflow.companion.data.model.ReportSyncFailedRequest
 import com.amakaflow.companion.data.model.Workout
-import com.amakaflow.companion.data.model.WorkoutCompletion
 import com.amakaflow.companion.data.model.WorkoutCompletionDetail
+import com.amakaflow.companion.data.model.WorkoutCompletionSaveResponse
 import com.amakaflow.companion.data.model.WorkoutCompletionSubmission
 import com.amakaflow.companion.debug.DebugLog
 import com.amakaflow.companion.domain.Result
@@ -219,7 +219,7 @@ class WorkoutRepositoryImpl @Inject constructor(
     /**
      * Submit a completed workout to the API
      */
-    suspend fun completeWorkout(submission: WorkoutCompletionSubmission): Result<WorkoutCompletion> {
+    suspend fun completeWorkout(submission: WorkoutCompletionSubmission): Result<WorkoutCompletionSaveResponse> {
         DebugLog.info("Submitting workout completion for: ${submission.workoutId}", TAG)
         return try {
             val response = api.completeWorkout(submission)
