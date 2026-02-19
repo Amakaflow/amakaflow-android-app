@@ -86,4 +86,73 @@ class WorkoutDetailViewModelTest {
             assertThat(finalState.error).isEqualTo("Workout not found")
         }
     }
+
+    @Test
+    fun `refresh reloads workout details`() = runTest {
+        // Given
+        val workout = TestFixtures.hiitWorkout
+        every { mockGetWorkoutDetail("workout-001") } returns flowOf(Result.Success(workout))
+
+        val viewModel = createViewModel()
+        viewModel.loadWorkout("workout-001")
+
+        // Wait for initial load
+        viewModel.uiState.test {
+            expectMostRecentItem()
+            cancelAndIgnoreRemainingEvents()
+        }
+
+        // When - refresh
+        viewModel.refresh()
+
+        // Then - should reload
+        viewModel.uiState.test {
+            val state = awaitItem()
+            assertThat(state.workout).isNotNull()
+            assertThat(state.error).isNull()
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun `refresh shows error on network failure during refresh`() = runTest {
+        // Given
+        every { mockGetWorkoutDetail("workout-001") } returns flowOf(Result.Error("Network error"))
+
+        val viewModel = createViewModel()
+        viewModel.loadWorkout("workout-001")
+
+        // Wait for initial load
+        viewModel.uiState.test {
+            expectMostRecentItem()
+            cancelAndIgnoreRemainingEvents()
+        }
+
+        // When - refresh fails
+        viewModel.refresh()
+
+        // Then - should show error
+        viewModel.uiState.test {
+            val finalState = expectMostRecentItem()
+            assertThat(finalState.error).isEqualTo("Network error")
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun `not found error shows specific message`() = runTest {
+        // Given
+        every { mockGetWorkoutDetail("missing-id") } returns flowOf(Result.Error("Workout not found"))
+
+        // When
+        val viewModel = createViewModel()
+        viewModel.loadWorkout("missing-id")
+
+        // Then
+        viewModel.uiState.test {
+            val state = expectMostRecentItem()
+            assertThat(state.error).contains("not found")
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
 }
