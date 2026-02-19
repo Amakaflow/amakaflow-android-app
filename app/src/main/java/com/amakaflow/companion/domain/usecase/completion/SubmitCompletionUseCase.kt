@@ -1,6 +1,6 @@
 package com.amakaflow.companion.domain.usecase.completion
 
-import com.amakaflow.companion.data.model.WorkoutCompletion
+import com.amakaflow.companion.data.model.WorkoutCompletionSaveResponse
 import com.amakaflow.companion.data.model.WorkoutCompletionSubmission
 import com.amakaflow.companion.domain.Result
 import com.amakaflow.companion.domain.repository.CompletionRepository
@@ -16,7 +16,7 @@ class SubmitCompletionUseCase @Inject constructor(
      * Submit a workout completion.
      * Attempts immediate submission; queues for later sync if offline or failed.
      */
-    suspend operator fun invoke(submission: WorkoutCompletionSubmission): Result<WorkoutCompletion> {
+    suspend operator fun invoke(submission: WorkoutCompletionSubmission): Result<WorkoutCompletionSaveResponse> {
         return completionRepository.submitCompletion(submission)
     }
 }

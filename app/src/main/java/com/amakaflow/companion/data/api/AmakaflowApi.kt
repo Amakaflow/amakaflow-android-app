@@ -77,10 +77,11 @@ interface AmakaflowApi {
     suspend fun getCompletionDetail(@Path("id") id: String): Response<CompletionDetailResponse>
 
     /**
-     * Submit a completed workout
+     * Submit a completed workout.
+     * AMA-323: API returns {"success": true, "id": "...", "summary": {...}}, NOT a WorkoutCompletion.
      */
     @POST("workouts/complete")
-    suspend fun completeWorkout(@Body submission: WorkoutCompletionSubmission): Response<WorkoutCompletion>
+    suspend fun completeWorkout(@Body submission: WorkoutCompletionSubmission): Response<WorkoutCompletionSaveResponse>
 }
 
 /**
