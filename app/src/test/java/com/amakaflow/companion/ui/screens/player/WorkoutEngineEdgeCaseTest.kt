@@ -10,8 +10,12 @@ import com.amakaflow.companion.simulation.SimulationSettings
 import com.amakaflow.companion.test.MainDispatcherRule
 import com.amakaflow.companion.test.TestFixtures
 import com.google.common.truth.Truth.assertThat
+import io.mockk.coEvery
 import io.mockk.every
+import io.mockk.just
+import io.mockk.Runs
 import io.mockk.mockk
+import androidx.lifecycle.SavedStateHandle
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
@@ -40,19 +44,20 @@ class WorkoutEngineEdgeCaseTest {
         mockSimulationSettings = mockk()
 
         every { mockGetWorkoutDetail(any()) } returns flowOf(Result.Success(TestFixtures.hiitWorkout))
-        every { mockSubmitCompletion(any()) } returns Result.Success(mockk())
-        every { mockMarkWorkoutCompleted(any()) } returns Result.Success(Unit)
-        every { mockSimulationSettings.getSnapshot() } returns mockk {
+        coEvery { mockSubmitCompletion(any()) } returns Result.Success(mockk())
+        coEvery { mockMarkWorkoutCompleted(any()) } just Runs
+        coEvery { mockSimulationSettings.getSnapshot() } returns mockk {
             every { isEnabled } returns false
         }
     }
 
-    private fun createViewModel(): WorkoutPlayerViewModel {
+    private fun createViewModel(workoutId: String = "workout-001"): WorkoutPlayerViewModel {
         return WorkoutPlayerViewModel(
             getWorkoutDetail = mockGetWorkoutDetail,
             submitCompletion = mockSubmitCompletion,
             markWorkoutCompleted = mockMarkWorkoutCompleted,
-            simulationSettings = mockSimulationSettings
+            simulationSettings = mockSimulationSettings,
+            savedStateHandle = SavedStateHandle(mapOf("workoutId" to workoutId))
         )
     }
 
@@ -76,7 +81,7 @@ class WorkoutEngineEdgeCaseTest {
             val pausedState = awaitItem()
 
             // Then - remaining time should be preserved (or slightly less from the delay)
-            assertThat(pausedState.remainingSeconds).isLessThanOrEqualTo(remainingAtPause)
+            assertThat(pausedState.remainingSeconds).isAtMost(remainingAtPause!!)
             assertThat(pausedState.phase).isEqualTo(WorkoutPhase.PAUSED)
             cancelAndIgnoreRemainingEvents()
         }
