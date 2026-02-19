@@ -102,8 +102,8 @@ class WorkoutDetailViewModelTest {
             cancelAndIgnoreRemainingEvents()
         }
 
-        // When - refresh
-        viewModel.refresh()
+        // When - refresh by reloading
+        viewModel.loadWorkout("workout-001")
 
         // Then - should reload
         viewModel.uiState.test {
@@ -129,7 +129,7 @@ class WorkoutDetailViewModelTest {
         }
 
         // When - refresh fails
-        viewModel.refresh()
+        viewModel.loadWorkout("workout-001")
 
         // Then - should show error
         viewModel.uiState.test {
