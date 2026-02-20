@@ -1210,7 +1210,7 @@ private fun HeartRateGraph(
     avgHeartRate: Int?,
     modifier: Modifier = Modifier
 ) {
-    if (heartRateSamples.isEmpty()) return
+    if (heartRateSamples.size < 2) return
 
     val orangeColor = AmakaColors.accentOrange
     val gradientStartColor = AmakaColors.accentOrange.copy(alpha = 0.6f)
