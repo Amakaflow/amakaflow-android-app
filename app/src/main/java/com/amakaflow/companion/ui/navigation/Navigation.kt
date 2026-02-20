@@ -361,6 +361,10 @@ fun MainScreen(testConfig: TestConfig) {
                     onNavigateBack = { navController.popBackStack() },
                     onRunAgain = { workoutId ->
                         navController.navigate(Screen.WorkoutPlayer.createRoute(workoutId))
+                    },
+                    onSaveToMyWorkouts = {
+                        // TODO: Implement save to my workouts navigation or action
+                        // This could navigate to a save dialog or trigger a save action
                     }
                 )
             }
