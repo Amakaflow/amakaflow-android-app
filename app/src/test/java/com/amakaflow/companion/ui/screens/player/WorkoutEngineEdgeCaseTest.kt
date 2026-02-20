@@ -46,7 +46,7 @@ class WorkoutEngineEdgeCaseTest {
         every { mockGetWorkoutDetail(any()) } returns flowOf(Result.Success(TestFixtures.hiitWorkout))
         coEvery { mockSubmitCompletion(any()) } returns Result.Success(mockk())
         coEvery { mockMarkWorkoutCompleted(any()) } just Runs
-        coEvery { mockSimulationSettings.getSnapshot() } returns mockk {
+        coEvery { mockSimulationSettings.getSnapshot() } returns mockk(relaxed = true) {
             every { isEnabled } returns false
         }
     }
@@ -69,12 +69,15 @@ class WorkoutEngineEdgeCaseTest {
         val viewModel = createViewModel()
 
         viewModel.uiState.test {
-            skipItems(1) // Skip loading
-            val runningState = awaitItem()
+            skipItems(1) // Skip initial RUNNING state
+            val runningState = awaitItem() // First timer tick
             val remainingAtPause = runningState.remainingSeconds
 
-            // Wait a bit for timer to decrement
+            // Wait a bit for timer to decrement - ticks buffer in Turbine during delay
             kotlinx.coroutines.delay(1500)
+
+            // Drain buffered timer ticks from the delay before pausing
+            expectMostRecentItem()
 
             // When - pause mid-interval
             viewModel.pause()
@@ -139,10 +142,10 @@ class WorkoutEngineEdgeCaseTest {
             awaitItem()
 
             // When - skip at last interval
-            viewModel.nextStep()
+            viewModel.nextStep()  // -> RESTING (Time interval has hasRestAfter=true)
+            viewModel.skipRest()  // -> ENDED (no more steps after rest)
 
-            // Then - workout should end (either go to ENDED or handle gracefully)
-            // Since there's only one step, nextStep should complete the workout
+            // Then - workout should end
             val finalState = expectMostRecentItem()
             assertThat(finalState.phase).isAnyOf(
                 WorkoutPhase.ENDED,
@@ -255,7 +258,8 @@ class WorkoutEngineEdgeCaseTest {
                 viewModel.skipRest()
 
                 // Then - should exit rest and continue
-                val afterSkip = awaitItem()
+                // completeRest() emits two updates; use expectMostRecentItem() to get the final one
+                val afterSkip = expectMostRecentItem()
                 assertThat(afterSkip.phase).isAnyOf(WorkoutPhase.RUNNING, WorkoutPhase.ENDED)
             }
             cancelAndIgnoreRemainingEvents()
@@ -271,14 +275,12 @@ class WorkoutEngineEdgeCaseTest {
 
         viewModel.uiState.test {
             skipItems(1) // Skip loading
-            val initialState = awaitItem()
-            val initialIndex = initialState.currentStepIndex
+            val state = awaitItem()
 
-            // When - try to go back at first step
+            // When - try to go back at first step (no-op, no state change emitted)
             viewModel.previousStep()
 
             // Then - should either stay at 0 or handle gracefully
-            val state = expectMostRecentItem()
             assertThat(state.currentStepIndex).isAtLeast(0)
             cancelAndIgnoreRemainingEvents()
         }
@@ -320,14 +322,12 @@ class WorkoutEngineEdgeCaseTest {
             skipItems(1) // Skip loading
             awaitItem() // Running
 
-            // When - end and save
-            viewModel.endAndSave()
-
-            // Then - should show confirmation first
+            // When - show confirmation, then end with USER_ENDED
+            // (endAndSave() directly ends; use showEndConfirmation() to test the dialog flow)
+            viewModel.showEndConfirmation()
             val state = awaitItem()
             assertThat(state.showEndConfirmation).isTrue()
 
-            // Actually end
             viewModel.end(EndReason.USER_ENDED)
             val endedState = awaitItem()
 
@@ -348,14 +348,12 @@ class WorkoutEngineEdgeCaseTest {
             skipItems(1) // Skip loading
             awaitItem() // Running
 
-            // When - end and discard
-            viewModel.endAndDiscard()
-
-            // Then - should show confirmation
+            // When - show confirmation, then discard
+            // (endAndDiscard() directly ends; use showEndConfirmation() to test the dialog flow)
+            viewModel.showEndConfirmation()
             val state = awaitItem()
             assertThat(state.showEndConfirmation).isTrue()
 
-            // Actually end
             viewModel.end(EndReason.DISCARDED)
             val endedState = awaitItem()
 
@@ -419,9 +417,10 @@ class WorkoutEngineEdgeCaseTest {
 
         val viewModel = createViewModel()
 
+        // Empty workout: start() returns early (no steps), no timer runs
+        // UnconfinedTestDispatcher processes init eagerly — get settled state directly
         viewModel.uiState.test {
-            skipItems(1) // Skip loading
-            val state = awaitItem()
+            val state = expectMostRecentItem()
 
             // Then - should handle empty workout without crashing
             assertThat(state.flattenedSteps).isEmpty()

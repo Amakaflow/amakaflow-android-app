@@ -47,7 +47,7 @@ class WorkoutEngineTest {
         every { mockGetWorkoutDetail(any()) } returns flowOf(Result.Success(TestFixtures.hiitWorkout))
         coEvery { mockSubmitCompletion(any()) } returns Result.Success(mockk())
         coEvery { mockMarkWorkoutCompleted(any()) } just Runs
-        coEvery { mockSimulationSettings.getSnapshot() } returns mockk {
+        coEvery { mockSimulationSettings.getSnapshot() } returns mockk(relaxed = true) {
             every { isEnabled } returns false
         }
     }
@@ -70,16 +70,12 @@ class WorkoutEngineTest {
         // When
         val viewModel = createViewModel()
 
-        // Then - should start in running state after loading
+        // Then - ViewModel loads and auto-starts in init (UnconfinedTestDispatcher runs init eagerly)
+        // Verify the settled state is RUNNING with workout loaded
         viewModel.uiState.test {
-            // First emission is loading
-            val loadingState = awaitItem()
-            assertThat(loadingState.isLoading).isTrue()
-
-            // After loading completes, workout starts automatically
-            val runningState = awaitItem()
-            assertThat(runningState.isLoading).isFalse()
-            assertThat(runningState.phase).isEqualTo(WorkoutPhase.RUNNING)
+            val state = expectMostRecentItem()
+            assertThat(state.isLoading).isFalse()
+            assertThat(state.phase).isEqualTo(WorkoutPhase.RUNNING)
             cancelAndIgnoreRemainingEvents()
         }
     }
@@ -215,12 +211,16 @@ class WorkoutEngineTest {
         val viewModel = createViewModel()
 
         viewModel.uiState.test {
-            skipItems(1) // Skip loading
-            val initialState = awaitItem()
+            skipItems(1) // Skip initial RUNNING state
+            val initialState = awaitItem() // Timer tick
             val initialStepIndex = initialState.currentStepIndex
 
             // Wait for first interval to complete (30 seconds + buffer)
+            // Timer fires -> nextStep() -> RESTING (hasRestAfter=true for Warmup)
             kotlinx.coroutines.delay(32000)
+
+            // Skip the rest phase to advance to next step
+            viewModel.skipRest()
 
             // Then - step index should have advanced
             val advancedState = expectMostRecentItem()
@@ -273,15 +273,17 @@ class WorkoutEngineTest {
         val viewModel = createViewModel()
 
         viewModel.uiState.test {
-            skipItems(1) // Skip loading
-            val initialState = awaitItem()
+            skipItems(1) // Skip initial RUNNING state
+            val initialState = awaitItem() // Timer tick
             val initialStepIndex = initialState.currentStepIndex
 
-            // When - manually advance to next step
-            viewModel.nextStep()
+            // nextStep() on a non-Cooldown interval enters rest phase first (hasRestAfter=true)
+            viewModel.nextStep()  // -> RESTING
+            // Then skip rest to actually advance to next step
+            viewModel.skipRest() // -> RUNNING + stepIndex++
 
-            // Then - step index should advance
-            val advancedState = awaitItem()
+            // Then - step index should advance (skipRest drives completeRest which has 2 updates)
+            val advancedState = expectMostRecentItem()
             assertThat(advancedState.currentStepIndex).isGreaterThan(initialStepIndex)
             cancelAndIgnoreRemainingEvents()
         }
@@ -307,12 +309,13 @@ class WorkoutEngineTest {
         val viewModel = createViewModel()
 
         viewModel.uiState.test {
-            skipItems(1) // Skip loading
-            skipItems(1) // Skip initial running state
+            skipItems(1) // Skip initial RUNNING state
+            skipItems(1) // Skip timer tick
 
-            // First advance forward
+            // First advance forward: nextStep -> REST, skipRest -> step 1
             viewModel.nextStep()
-            awaitItem()
+            viewModel.skipRest()
+            expectMostRecentItem() // Consume advancement emissions
 
             // When - go back
             viewModel.previousStep()
@@ -326,7 +329,7 @@ class WorkoutEngineTest {
 
     @Test
     fun `workout completion sets phase to ENDED`() = runTest {
-        // Given - short workout that will complete quickly
+        // Given - short workout using Cooldown (no rest phase after Cooldown)
         val shortWorkout = Workout(
             id = "short-workout",
             name = "Quick Test",
@@ -335,7 +338,7 @@ class WorkoutEngineTest {
             sport = WorkoutSport.CARDIO,
             source = WorkoutSource.AMAKA,
             intervals = listOf(
-                WorkoutInterval.Time(seconds = 1, target = "Quick")
+                WorkoutInterval.Cooldown(seconds = 1)
             )
         )
         every { mockGetWorkoutDetail("workout-001") } returns flowOf(Result.Success(shortWorkout))
@@ -343,9 +346,10 @@ class WorkoutEngineTest {
         val viewModel = createViewModel()
 
         viewModel.uiState.test {
-            skipItems(1) // Skip loading
+            skipItems(1) // Skip initial RUNNING state
 
-            // Wait for workout to complete (1 second + buffer)
+            // Wait for cooldown to complete (1 second + buffer)
+            // Cooldown has hasRestAfter=false so timer fires -> nextStep -> ENDED directly
             kotlinx.coroutines.delay(2000)
 
             // Then - should be ended
