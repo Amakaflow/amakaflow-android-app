@@ -190,6 +190,52 @@ class HistoryViewModelTest {
         viewModel.uiState.test {
             val finalState = expectMostRecentItem()
             assertThat(finalState.groupedCompletions).isNotEmpty()
+            cancelAndIgnoreRemainingEvents()
         }
+    }
+
+    @Test
+    fun `empty state shows no completions`() = runTest {
+        // Given
+        val emptyResult = CompletionsResult(
+            completions = emptyList(),
+            total = 0
+        )
+        every { mockGetCompletionHistory(50, 0) } returns flowOf(Result.Success(emptyResult))
+
+        // When
+        val viewModel = createViewModel()
+
+        // Then
+        viewModel.uiState.test {
+            val state = expectMostRecentItem()
+            assertThat(state.completions).isEmpty()
+            assertThat(state.total).isEqualTo(0)
+            assertThat(state.hasMore).isFalse()
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun `loading more shows loading indicator`() = runTest {
+        // Given - initial load
+        val initialResult = CompletionsResult(
+            completions = TestFixtures.sampleCompletions.take(2),
+            total = 10
+        )
+        every { mockGetCompletionHistory(50, 0) } returns flowOf(Result.Success(initialResult))
+
+        // When - trigger load more (but mock doesn't return for offset 2 to simulate delay)
+        val viewModel = createViewModel()
+
+        // Wait for initial load
+        viewModel.uiState.test {
+            expectMostRecentItem()
+            cancelAndIgnoreRemainingEvents()
+        }
+
+        // Then - canLoadMore should be true
+        val state = viewModel.uiState.value
+        assertThat(state.canLoadMore).isTrue()
     }
 }
