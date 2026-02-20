@@ -497,26 +497,28 @@ private fun CompletionDetailContent(
             }
         }
 
-        // Run Again button (always present)
-        item {
-            Button(
-                onClick = { completion.workoutId?.let { onRunAgain?.invoke(it) } },
-                modifier = Modifier.fillMaxWidth(),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = AmakaColors.accentGreen
-                ),
-                shape = RoundedCornerShape(AmakaCornerRadius.md.dp)
-            ) {
-                Icon(
-                    imageVector = Icons.Filled.PlayArrow,
-                    contentDescription = null,
-                    modifier = Modifier.size(20.dp)
-                )
-                Spacer(modifier = Modifier.width(AmakaSpacing.sm.dp))
-                Text(
-                    text = "Run Again",
-                    fontWeight = FontWeight.SemiBold
-                )
+        // Run Again button (only shown when workoutId and callback are available)
+        if (completion.workoutId != null && onRunAgain != null) {
+            item {
+                Button(
+                    onClick = { onRunAgain(completion.workoutId!!) },
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = AmakaColors.accentGreen
+                    ),
+                    shape = RoundedCornerShape(AmakaCornerRadius.md.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.PlayArrow,
+                        contentDescription = null,
+                        modifier = Modifier.size(20.dp)
+                    )
+                    Spacer(modifier = Modifier.width(AmakaSpacing.sm.dp))
+                    Text(
+                        text = "Run Again",
+                        fontWeight = FontWeight.SemiBold
+                    )
+                }
             }
         }
 
