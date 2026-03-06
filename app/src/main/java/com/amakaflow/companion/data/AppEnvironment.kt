@@ -24,6 +24,13 @@ enum class AppEnvironment {
             DEVELOPMENT -> BuildConfig.INGESTOR_API_URL_DEV
         }
 
+    val mcpApiUrl: String
+        get() = when (this) {
+            PRODUCTION -> BuildConfig.MCP_API_URL_PROD
+            STAGING -> BuildConfig.MCP_API_URL_STAGING
+            DEVELOPMENT -> BuildConfig.MCP_API_URL_DEV
+        }
+
     val displayName: String
         get() = when (this) {
             PRODUCTION -> "Production"
