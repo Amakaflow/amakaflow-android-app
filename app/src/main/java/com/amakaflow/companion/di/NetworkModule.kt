@@ -8,6 +8,7 @@ import com.amakaflow.companion.data.api.AmakaflowApi
 import com.amakaflow.companion.data.api.AuthAuthenticator
 import com.amakaflow.companion.data.api.AuthStateManager
 import com.amakaflow.companion.data.api.IngestorApi
+import com.amakaflow.companion.data.api.KnowledgeApi
 import com.amakaflow.companion.data.local.SecureStorage
 import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
 import dagger.Module
@@ -260,5 +261,39 @@ object NetworkModule {
     @Singleton
     fun provideIngestorApi(@Named("ingestor") retrofit: Retrofit): IngestorApi {
         return retrofit.create(IngestorApi::class.java)
+    }
+
+    @Provides
+    @Singleton
+    @Named("chat")
+    fun provideChatOkHttpClient(
+        authInterceptor: Interceptor,
+        loggingInterceptor: HttpLoggingInterceptor,
+    ): OkHttpClient {
+        return OkHttpClient.Builder()
+            .addInterceptor(authInterceptor)
+            .addInterceptor(loggingInterceptor)
+            .connectTimeout(30, TimeUnit.SECONDS)
+            .readTimeout(30, TimeUnit.SECONDS)
+            .writeTimeout(30, TimeUnit.SECONDS)
+            .build()
+    }
+
+    @Provides
+    @Singleton
+    @Named("chat")
+    fun provideChatRetrofit(@Named("chat") okHttpClient: OkHttpClient, json: Json): Retrofit {
+        val contentType = "application/json".toMediaType()
+        return Retrofit.Builder()
+            .baseUrl(AppEnvironment.current.chatApiUrl)
+            .client(okHttpClient)
+            .addConverterFactory(json.asConverterFactory(contentType))
+            .build()
+    }
+
+    @Provides
+    @Singleton
+    fun provideKnowledgeApi(@Named("chat") retrofit: Retrofit): KnowledgeApi {
+        return retrofit.create(KnowledgeApi::class.java)
     }
 }

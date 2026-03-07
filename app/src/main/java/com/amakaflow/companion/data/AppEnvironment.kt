@@ -31,6 +31,13 @@ enum class AppEnvironment {
             DEVELOPMENT -> BuildConfig.MCP_API_URL_DEV
         }
 
+    val chatApiUrl: String
+        get() = when (this) {
+            PRODUCTION -> BuildConfig.CHAT_API_URL_PROD
+            STAGING -> BuildConfig.CHAT_API_URL_STAGING
+            DEVELOPMENT -> BuildConfig.CHAT_API_URL_DEV
+        }
+
     val displayName: String
         get() = when (this) {
             PRODUCTION -> "Production"

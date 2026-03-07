@@ -32,7 +32,10 @@ android {
         buildConfigField("String", "MCP_API_URL_PROD", "\"https://amakaflow-mcp.onrender.com\"")
         buildConfigField("String", "MCP_API_URL_STAGING", "\"https://amakaflow-mcp.onrender.com\"")
         buildConfigField("String", "MCP_API_URL_DEV", "\"http://10.0.2.2:8000\"")
-        
+        buildConfigField("String", "CHAT_API_URL_PROD", "\"https://chat-api.amakaflow.com\"")
+        buildConfigField("String", "CHAT_API_URL_STAGING", "\"https://chat-api.staging.amakaflow.com\"")
+        buildConfigField("String", "CHAT_API_URL_DEV", "\"http://10.0.2.2:8005\"")
+
         // Sentry DSN - configured per build variant via environment or build config
         val sentryDsn = System.getenv("SENTRY_DSN")?.takeIf { it.isNotBlank() }
             ?: "https://placeholder@o1.ingest.sentry.io/0"
