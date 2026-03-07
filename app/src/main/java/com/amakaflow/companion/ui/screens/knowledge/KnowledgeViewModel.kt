@@ -55,6 +55,10 @@ class KnowledgeViewModel @Inject constructor(
     }
 
     fun ingest(url: String? = null, text: String? = null) {
+        if (url.isNullOrBlank() && text.isNullOrBlank()) {
+            _uiState.value = _uiState.value.copy(error = "Please provide a URL or text")
+            return
+        }
         viewModelScope.launch {
             _uiState.update { it.copy(isSaving = true, error = null, savedSuccess = false) }
             try {

@@ -4,6 +4,7 @@ import com.amakaflow.companion.data.model.KnowledgeCard
 import com.amakaflow.companion.data.model.KnowledgeCardListResponse
 import com.amakaflow.companion.data.model.KnowledgeIngestRequest
 import com.amakaflow.companion.data.model.KnowledgeSearchRequest
+import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.DELETE
 import retrofit2.http.GET
@@ -25,5 +26,5 @@ interface KnowledgeApi {
     suspend fun ingest(@Body request: KnowledgeIngestRequest): KnowledgeCard
 
     @DELETE("api/knowledge/cards/{id}")
-    suspend fun deleteCard(@Path("id") id: String)
+    suspend fun deleteCard(@Path("id") id: String): Response<Unit>
 }

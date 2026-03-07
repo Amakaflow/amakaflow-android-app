@@ -36,6 +36,10 @@ annotation class DynamicMapperUrl
 @Retention(AnnotationRetention.BINARY)
 annotation class DynamicIngestorUrl
 
+@Qualifier
+@Retention(AnnotationRetention.BINARY)
+annotation class DynamicChatUrl
+
 @Module
 @InstallIn(SingletonComponent::class)
 object NetworkModule {
@@ -88,6 +92,27 @@ object NetworkModule {
                 .scheme(AppEnvironment.current.ingestorApiUrl.toHttpUrl().scheme)
                 .host(AppEnvironment.current.ingestorApiUrl.toHttpUrl().host)
                 .port(AppEnvironment.current.ingestorApiUrl.toHttpUrl().port)
+                .build()
+            val newRequest = originalRequest.newBuilder()
+                .url(newUrl)
+                .build()
+            chain.proceed(newRequest)
+        }
+    }
+
+    /**
+     * Dynamic URL interceptor for Chat API - reads AppEnvironment.current on each request
+     */
+    @Provides
+    @Singleton
+    @DynamicChatUrl
+    fun provideChatUrlInterceptor(): Interceptor {
+        return Interceptor { chain ->
+            val originalRequest = chain.request()
+            val newUrl = originalRequest.url.newBuilder()
+                .scheme(AppEnvironment.current.chatApiUrl.toHttpUrl().scheme)
+                .host(AppEnvironment.current.chatApiUrl.toHttpUrl().host)
+                .port(AppEnvironment.current.chatApiUrl.toHttpUrl().port)
                 .build()
             val newRequest = originalRequest.newBuilder()
                 .url(newUrl)
@@ -269,8 +294,10 @@ object NetworkModule {
     fun provideChatOkHttpClient(
         authInterceptor: Interceptor,
         loggingInterceptor: HttpLoggingInterceptor,
+        @DynamicChatUrl dynamicUrlInterceptor: Interceptor,
     ): OkHttpClient {
         return OkHttpClient.Builder()
+            .addInterceptor(dynamicUrlInterceptor)
             .addInterceptor(authInterceptor)
             .addInterceptor(loggingInterceptor)
             .connectTimeout(30, TimeUnit.SECONDS)
@@ -284,8 +311,9 @@ object NetworkModule {
     @Named("chat")
     fun provideChatRetrofit(@Named("chat") okHttpClient: OkHttpClient, json: Json): Retrofit {
         val contentType = "application/json".toMediaType()
+        // Use placeholder URL - actual URL is set dynamically by DynamicChatUrl interceptor
         return Retrofit.Builder()
-            .baseUrl(AppEnvironment.current.chatApiUrl)
+            .baseUrl("https://placeholder.amakaflow.com/")
             .client(okHttpClient)
             .addConverterFactory(json.asConverterFactory(contentType))
             .build()
