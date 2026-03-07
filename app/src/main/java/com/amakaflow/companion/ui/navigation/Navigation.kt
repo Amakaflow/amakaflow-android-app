@@ -295,7 +295,10 @@ fun MainScreen(testConfig: TestConfig) {
                     },
                     onNavigateToSettings = {
                         navController.navigate(Screen.Settings.route)
-                    }
+                    },
+                    onNavigateToAIImport = {
+                        navController.navigate(Screen.AIImport.route)
+                    },
                 )
             }
 

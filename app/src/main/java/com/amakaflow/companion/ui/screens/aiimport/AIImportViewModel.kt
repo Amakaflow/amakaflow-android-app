@@ -3,6 +3,8 @@ package com.amakaflow.companion.ui.screens.aiimport
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.amakaflow.companion.data.AppEnvironment
+import com.amakaflow.companion.data.TestConfig
+import com.amakaflow.companion.data.local.SecureStorage
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -14,8 +16,8 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import org.json.JSONObject
-import java.util.concurrent.TimeUnit
 import javax.inject.Inject
+import javax.inject.Named
 
 data class AIImportUiState(
     val isStreaming: Boolean = false,
@@ -25,14 +27,29 @@ data class AIImportUiState(
 )
 
 @HiltViewModel
-class AIImportViewModel @Inject constructor() : ViewModel() {
+class AIImportViewModel @Inject constructor(
+    @Named("mcp") private val httpClient: OkHttpClient,
+    private val secureStorage: SecureStorage,
+    private val testConfig: TestConfig,
+) : ViewModel() {
 
     private val _uiState = MutableStateFlow(AIImportUiState())
     val uiState: StateFlow<AIImportUiState> = _uiState.asStateFlow()
 
-    private val httpClient = OkHttpClient.Builder()
-        .readTimeout(120, TimeUnit.SECONDS)
-        .build()
+    private fun resolveProfileId(): String {
+        if (testConfig.isTestModeEnabled) {
+            testConfig.testUserId?.trim()?.takeIf { it.isNotEmpty() }?.let { return it }
+        }
+        // Parse user profile JSON stored in SecureStorage to extract the id field.
+        return try {
+            secureStorage.getUserProfile()
+                ?.let { JSONObject(it).optString("id", "") }
+                ?.takeIf { it.isNotEmpty() }
+                ?: "unknown"
+        } catch (_: Exception) {
+            "unknown"
+        }
+    }
 
     fun startImport(message: String, sourceUrl: String?) {
         _uiState.value = AIImportUiState(isStreaming = true)
@@ -41,7 +58,7 @@ class AIImportViewModel @Inject constructor() : ViewModel() {
             try {
                 val baseUrl = AppEnvironment.current.mcpApiUrl
                 val body = JSONObject().apply {
-                    put("profile_id", "current_user")
+                    put("profile_id", resolveProfileId())
                     put("message", message)
                     if (!sourceUrl.isNullOrBlank()) put("source_url", sourceUrl)
                 }
@@ -54,9 +71,10 @@ class AIImportViewModel @Inject constructor() : ViewModel() {
 
                 httpClient.newCall(request).execute().use { response ->
                     if (!response.isSuccessful) {
+                        val detail = response.body?.string()?.take(200) ?: ""
                         _uiState.value = _uiState.value.copy(
                             isStreaming = false,
-                            error = "HTTP ${response.code}",
+                            error = "HTTP ${response.code}: $detail",
                         )
                         return@launch
                     }
@@ -66,26 +84,31 @@ class AIImportViewModel @Inject constructor() : ViewModel() {
                         return@launch
                     }
 
-                    var eventName = ""
-                    var dataBuffer = ""
+                    // SSE parsing: buffer event name and data, flush on blank line.
+                    var pendingEvent = ""
+                    var pendingData = ""
 
                     while (!source.exhausted()) {
                         val line = source.readUtf8Line() ?: break
                         when {
                             line.startsWith("event: ") -> {
-                                eventName = line.removePrefix("event: ")
-                                if (eventName == "done") break
+                                pendingEvent = line.removePrefix("event: ")
+                                if (pendingEvent == "done") break
                             }
                             line.startsWith("data: ") -> {
-                                dataBuffer = line.removePrefix("data: ")
-                                if (eventName.isNotEmpty() && dataBuffer.isNotEmpty()) {
-                                    val display = "[$eventName] $dataBuffer"
+                                pendingData = line.removePrefix("data: ")
+                            }
+                            line.isEmpty() -> {
+                                // Blank line = dispatch the buffered event
+                                val eventName = pendingEvent.ifEmpty { "message" }
+                                if (pendingData.isNotEmpty()) {
+                                    val display = "[$eventName] $pendingData"
                                     _uiState.value = _uiState.value.copy(
                                         events = _uiState.value.events + display,
                                     )
-                                    eventName = ""
-                                    dataBuffer = ""
                                 }
+                                pendingEvent = ""
+                                pendingData = ""
                             }
                         }
                     }

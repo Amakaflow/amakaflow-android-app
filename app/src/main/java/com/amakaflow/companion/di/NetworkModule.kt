@@ -208,6 +208,24 @@ object NetworkModule {
 
     @Provides
     @Singleton
+    @Named("mcp")
+    fun provideMcpOkHttpClient(
+        authInterceptor: Interceptor,
+        loggingInterceptor: HttpLoggingInterceptor,
+    ): OkHttpClient {
+        // No dynamic URL interceptor needed: the MCP URL is read directly from AppEnvironment.
+        // Use a longer read timeout to accommodate streaming SSE responses.
+        return OkHttpClient.Builder()
+            .addInterceptor(authInterceptor)
+            .addInterceptor(loggingInterceptor)
+            .connectTimeout(30, TimeUnit.SECONDS)
+            .readTimeout(120, TimeUnit.SECONDS)
+            .writeTimeout(30, TimeUnit.SECONDS)
+            .build()
+    }
+
+    @Provides
+    @Singleton
     @Named("mapper")
     fun provideMapperRetrofit(@Named("mapper") okHttpClient: OkHttpClient, json: Json): Retrofit {
         val contentType = "application/json".toMediaType()
