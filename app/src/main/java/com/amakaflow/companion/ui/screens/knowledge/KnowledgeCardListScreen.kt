@@ -20,6 +20,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.amakaflow.companion.data.model.KnowledgeCard
 import com.amakaflow.companion.ui.theme.AmakaColors
 import com.amakaflow.companion.ui.theme.AmakaSpacing
+import kotlinx.coroutines.delay
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -32,11 +33,8 @@ fun KnowledgeCardListScreen(
     val uiState by viewModel.uiState.collectAsState()
     var searchQuery by remember { mutableStateOf("") }
 
-    LaunchedEffect(Unit) {
-        viewModel.loadCards()
-    }
-
     LaunchedEffect(searchQuery) {
+        delay(300L)
         when {
             searchQuery.length >= 3 -> viewModel.search(searchQuery)
             searchQuery.isEmpty() -> viewModel.loadCards()
@@ -44,7 +42,6 @@ fun KnowledgeCardListScreen(
     }
 
     Scaffold(
-        modifier = Modifier.testTag("knowledge_library_screen"),
         topBar = {
             TopAppBar(
                 title = { Text("Knowledge Library") },
@@ -74,7 +71,8 @@ fun KnowledgeCardListScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(innerPadding),
+                .padding(innerPadding)
+                .testTag("knowledge_library_screen"),
         ) {
             OutlinedTextField(
                 value = searchQuery,

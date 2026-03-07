@@ -22,16 +22,14 @@ fun KnowledgeCardDetailScreen(
     viewModel: KnowledgeViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsState()
-    val card = uiState.cards.firstOrNull { it.id == cardId }
 
-    LaunchedEffect(Unit) {
-        if (card == null) {
-            viewModel.loadCards()
-        }
+    LaunchedEffect(cardId) {
+        viewModel.loadCard(cardId)
     }
 
+    val card = uiState.selectedCard
+
     Scaffold(
-        modifier = Modifier.testTag("knowledge_card_detail_screen"),
         topBar = {
             TopAppBar(
                 title = { Text(card?.title ?: "Card Detail") },
@@ -49,6 +47,7 @@ fun KnowledgeCardDetailScreen(
         },
         containerColor = AmakaColors.background,
     ) { innerPadding ->
+        Box(modifier = Modifier.fillMaxSize().testTag("knowledge_card_detail_screen")) {
         if (card == null) {
             Box(
                 modifier = Modifier
@@ -139,5 +138,6 @@ fun KnowledgeCardDetailScreen(
                 }
             }
         }
+        } // end testTag Box
     }
 }

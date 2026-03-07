@@ -11,6 +11,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.amakaflow.companion.ui.theme.AmakaColors
 import com.amakaflow.companion.ui.theme.AmakaSpacing
+import kotlinx.coroutines.flow.collectLatest
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -22,15 +23,11 @@ fun AddKnowledgeScreen(
     var urlText by remember { mutableStateOf("") }
     var manualText by remember { mutableStateOf("") }
 
-    LaunchedEffect(uiState.savedSuccess) {
-        if (uiState.savedSuccess) {
-            viewModel.resetSavedSuccess()
-            onNavigateBack()
-        }
+    LaunchedEffect(viewModel) {
+        viewModel.navigationEvent.collectLatest { onNavigateBack() }
     }
 
     Scaffold(
-        modifier = Modifier.testTag("add_knowledge_screen"),
         topBar = {
             TopAppBar(
                 title = { Text("Add to Library") },
@@ -52,7 +49,8 @@ fun AddKnowledgeScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
-                .padding(horizontal = AmakaSpacing.lg.dp, vertical = AmakaSpacing.md.dp),
+                .padding(horizontal = AmakaSpacing.lg.dp, vertical = AmakaSpacing.md.dp)
+                .testTag("add_knowledge_screen"),
             verticalArrangement = Arrangement.spacedBy(AmakaSpacing.md.dp),
         ) {
             OutlinedTextField(

@@ -25,6 +25,9 @@ interface KnowledgeApi {
     @POST("api/knowledge/ingest")
     suspend fun ingest(@Body request: KnowledgeIngestRequest): KnowledgeCard
 
+    @GET("api/knowledge/cards/{id}")
+    suspend fun getCard(@Path("id") id: String): KnowledgeCard
+
     @DELETE("api/knowledge/cards/{id}")
     suspend fun deleteCard(@Path("id") id: String): Response<Unit>
 }
