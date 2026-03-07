@@ -47,6 +47,9 @@ import com.amakaflow.companion.ui.screens.settings.SettingsScreen
 import com.amakaflow.companion.ui.screens.settings.SettingsViewModel
 import com.amakaflow.companion.ui.screens.settings.TranscriptionSettingsScreen
 import com.amakaflow.companion.ui.screens.aiimport.AIImportScreen
+import com.amakaflow.companion.ui.screens.knowledge.AddKnowledgeScreen
+import com.amakaflow.companion.ui.screens.knowledge.KnowledgeCardDetailScreen
+import com.amakaflow.companion.ui.screens.knowledge.KnowledgeCardListScreen
 import com.amakaflow.companion.ui.screens.voice.VoiceWorkoutScreen
 import com.amakaflow.companion.ui.screens.workouts.WorkoutDetailScreen
 import com.amakaflow.companion.ui.screens.workouts.WorkoutsScreen
@@ -76,6 +79,11 @@ sealed class Screen(val route: String) {
     data object TranscriptionSettings : Screen("transcription_settings")
     data object VoiceWorkout : Screen("voice_workout")
     data object AIImport : Screen("ai_import")
+    data object KnowledgeLibrary : Screen("knowledge_library")
+    data object KnowledgeCardDetail : Screen("knowledge_card/{cardId}") {
+        fun createRoute(cardId: String) = "knowledge_card/$cardId"
+    }
+    data object AddKnowledge : Screen("add_knowledge")
     data object CompletionDetail : Screen("completion/{completionId}") {
         fun createRoute(completionId: String) = "completion/$completionId"
     }
@@ -299,6 +307,38 @@ fun MainScreen(testConfig: TestConfig) {
                     onNavigateToAIImport = {
                         navController.navigate(Screen.AIImport.route)
                     },
+                    onNavigateToKnowledgeLibrary = {
+                        navController.navigate(Screen.KnowledgeLibrary.route)
+                    },
+                )
+            }
+
+            composable(Screen.KnowledgeLibrary.route) {
+                KnowledgeCardListScreen(
+                    onNavigateBack = { navController.popBackStack() },
+                    onNavigateToDetail = { cardId ->
+                        navController.navigate(Screen.KnowledgeCardDetail.createRoute(cardId))
+                    },
+                    onNavigateToAdd = {
+                        navController.navigate(Screen.AddKnowledge.route)
+                    },
+                )
+            }
+
+            composable(
+                route = Screen.KnowledgeCardDetail.route,
+                arguments = listOf(navArgument("cardId") { type = NavType.StringType }),
+            ) { backStackEntry ->
+                val cardId = backStackEntry.arguments?.getString("cardId") ?: return@composable
+                KnowledgeCardDetailScreen(
+                    cardId = cardId,
+                    onNavigateBack = { navController.popBackStack() },
+                )
+            }
+
+            composable(Screen.AddKnowledge.route) {
+                AddKnowledgeScreen(
+                    onNavigateBack = { navController.popBackStack() },
                 )
             }
 

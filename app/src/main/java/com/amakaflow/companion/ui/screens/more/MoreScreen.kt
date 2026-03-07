@@ -7,6 +7,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.History
+import androidx.compose.material.icons.filled.LibraryBooks
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -25,6 +26,7 @@ fun MoreScreen(
     onNavigateToHistory: () -> Unit,
     onNavigateToSettings: () -> Unit,
     onNavigateToAIImport: () -> Unit,
+    onNavigateToKnowledgeLibrary: () -> Unit,
 ) {
     Column(
         modifier = Modifier
@@ -73,6 +75,17 @@ fun MoreScreen(
             icon = Icons.Filled.AutoAwesome,
             title = "AI Import",
             onClick = onNavigateToAIImport
+        )
+
+        HorizontalDivider(
+            color = AmakaColors.borderLight,
+            modifier = Modifier.padding(start = 56.dp)
+        )
+
+        MoreMenuItem(
+            icon = Icons.Filled.LibraryBooks,
+            title = "My Library",
+            onClick = onNavigateToKnowledgeLibrary
         )
 
         HorizontalDivider(color = AmakaColors.borderLight)
