@@ -29,6 +29,9 @@ android {
         buildConfigField("String", "INGESTOR_API_URL_PROD", "\"https://workout-ingestor-api.staging.amakaflow.com\"")
         buildConfigField("String", "INGESTOR_API_URL_STAGING", "\"https://workout-ingestor-api.staging.amakaflow.com\"")
         buildConfigField("String", "INGESTOR_API_URL_DEV", "\"http://10.0.2.2:8002\"")
+        buildConfigField("String", "MCP_API_URL_PROD", "\"https://amakaflow-mcp.onrender.com\"")
+        buildConfigField("String", "MCP_API_URL_STAGING", "\"https://amakaflow-mcp.onrender.com\"")
+        buildConfigField("String", "MCP_API_URL_DEV", "\"http://10.0.2.2:8000\"")
         
         // Sentry DSN - configured per build variant via environment or build config
         val sentryDsn = System.getenv("SENTRY_DSN")?.takeIf { it.isNotBlank() }

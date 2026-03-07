@@ -46,6 +46,7 @@ import com.amakaflow.companion.ui.screens.player.WorkoutPlayerScreen
 import com.amakaflow.companion.ui.screens.settings.SettingsScreen
 import com.amakaflow.companion.ui.screens.settings.SettingsViewModel
 import com.amakaflow.companion.ui.screens.settings.TranscriptionSettingsScreen
+import com.amakaflow.companion.ui.screens.aiimport.AIImportScreen
 import com.amakaflow.companion.ui.screens.voice.VoiceWorkoutScreen
 import com.amakaflow.companion.ui.screens.workouts.WorkoutDetailScreen
 import com.amakaflow.companion.ui.screens.workouts.WorkoutsScreen
@@ -74,6 +75,7 @@ sealed class Screen(val route: String) {
     data object DebugLog : Screen("debug_log")
     data object TranscriptionSettings : Screen("transcription_settings")
     data object VoiceWorkout : Screen("voice_workout")
+    data object AIImport : Screen("ai_import")
     data object CompletionDetail : Screen("completion/{completionId}") {
         fun createRoute(completionId: String) = "completion/$completionId"
     }
@@ -272,6 +274,12 @@ fun MainScreen(testConfig: TestConfig) {
                 )
             }
 
+            composable(Screen.AIImport.route) {
+                AIImportScreen(
+                    onNavigateBack = { navController.popBackStack() },
+                )
+            }
+
             composable(Screen.Calendar.route) {
                 CalendarScreen(
                     onNavigateToWorkouts = {
@@ -287,7 +295,10 @@ fun MainScreen(testConfig: TestConfig) {
                     },
                     onNavigateToSettings = {
                         navController.navigate(Screen.Settings.route)
-                    }
+                    },
+                    onNavigateToAIImport = {
+                        navController.navigate(Screen.AIImport.route)
+                    },
                 )
             }
 

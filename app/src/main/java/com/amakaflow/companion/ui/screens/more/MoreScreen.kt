@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Settings
@@ -22,7 +23,8 @@ import com.amakaflow.companion.ui.theme.AmakaSpacing
 @Composable
 fun MoreScreen(
     onNavigateToHistory: () -> Unit,
-    onNavigateToSettings: () -> Unit
+    onNavigateToSettings: () -> Unit,
+    onNavigateToAIImport: () -> Unit,
 ) {
     Column(
         modifier = Modifier
@@ -60,6 +62,17 @@ fun MoreScreen(
             icon = Icons.Filled.Settings,
             title = "Settings",
             onClick = onNavigateToSettings
+        )
+
+        HorizontalDivider(
+            color = AmakaColors.borderLight,
+            modifier = Modifier.padding(start = 56.dp)
+        )
+
+        MoreMenuItem(
+            icon = Icons.Filled.AutoAwesome,
+            title = "AI Import",
+            onClick = onNavigateToAIImport
         )
 
         HorizontalDivider(color = AmakaColors.borderLight)
