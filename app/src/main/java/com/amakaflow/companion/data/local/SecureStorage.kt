@@ -16,17 +16,23 @@ import javax.inject.Singleton
 class SecureStorage @Inject constructor(
     @ApplicationContext private val context: Context
 ) {
-    private val masterKey = MasterKey.Builder(context)
-        .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
-        .build()
+    // Lazy initialization to avoid blocking the main thread during app startup
+    // EncryptedSharedPreferences requires Android Keystore access which can take 2+ seconds on cold starts
+    private val masterKey by lazy {
+        MasterKey.Builder(context)
+            .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
+            .build()
+    }
 
-    private val securePrefs: SharedPreferences = EncryptedSharedPreferences.create(
-        context,
-        "amakaflow_secure_prefs",
-        masterKey,
-        EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
-        EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
-    )
+    private val securePrefs: SharedPreferences by lazy {
+        EncryptedSharedPreferences.create(
+            context,
+            "amakaflow_secure_prefs",
+            masterKey,
+            EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
+            EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
+        )
+    }
 
     companion object {
         private const val KEY_JWT_TOKEN = "jwt_token"
