@@ -5,10 +5,12 @@ import com.amakaflow.companion.data.TestConfig
 import com.amakaflow.companion.data.repository.CompletionRepositoryImpl
 import com.amakaflow.companion.data.repository.FixtureWorkoutRepository
 import com.amakaflow.companion.data.repository.PairingRepositoryImpl
+import com.amakaflow.companion.data.repository.PlannerRepositoryImpl
 import com.amakaflow.companion.data.repository.WorkoutRepositoryImpl
 import com.amakaflow.companion.data.sync.SyncCoordinatorImpl
 import com.amakaflow.companion.domain.repository.CompletionRepository
 import com.amakaflow.companion.domain.repository.PairingRepository
+import com.amakaflow.companion.domain.repository.PlannerRepository
 import com.amakaflow.companion.domain.repository.WorkoutRepository
 import com.amakaflow.companion.domain.sync.SyncCoordinator
 import dagger.Binds
@@ -46,6 +48,12 @@ abstract class RepositoryModule {
     abstract fun bindSyncCoordinator(
         impl: SyncCoordinatorImpl
     ): SyncCoordinator
+
+    @Binds
+    @Singleton
+    abstract fun bindPlannerRepository(
+        impl: PlannerRepositoryImpl
+    ): PlannerRepository
 
     companion object {
         @Provides

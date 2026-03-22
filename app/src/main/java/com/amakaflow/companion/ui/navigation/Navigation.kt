@@ -47,6 +47,11 @@ import com.amakaflow.companion.ui.screens.settings.SettingsScreen
 import com.amakaflow.companion.ui.screens.settings.SettingsViewModel
 import com.amakaflow.companion.ui.screens.settings.TranscriptionSettingsScreen
 import com.amakaflow.companion.ui.screens.aiimport.AIImportScreen
+import com.amakaflow.companion.ui.screens.coach.CoachChatScreen
+import com.amakaflow.companion.ui.screens.fatigue.FatigueAdvisorScreen
+import com.amakaflow.companion.ui.screens.feed.ActivityFeedScreen
+import com.amakaflow.companion.ui.screens.preferences.TrainingPreferencesScreen
+import com.amakaflow.companion.ui.screens.shoes.ShoeComparisonScreen
 import com.amakaflow.companion.ui.screens.voice.VoiceWorkoutScreen
 import com.amakaflow.companion.ui.screens.workouts.WorkoutDetailScreen
 import com.amakaflow.companion.ui.screens.workouts.WorkoutsScreen
@@ -79,6 +84,12 @@ sealed class Screen(val route: String) {
     data object CompletionDetail : Screen("completion/{completionId}") {
         fun createRoute(completionId: String) = "completion/$completionId"
     }
+    // AMA-1148: New screens
+    data object CoachChat : Screen("coach_chat")
+    data object ActivityFeed : Screen("activity_feed")
+    data object TrainingPreferences : Screen("training_preferences")
+    data object ShoeComparison : Screen("shoe_comparison")
+    data object FatigueAdvisor : Screen("fatigue_advisor")
 }
 
 /**
@@ -299,6 +310,21 @@ fun MainScreen(testConfig: TestConfig) {
                     onNavigateToAIImport = {
                         navController.navigate(Screen.AIImport.route)
                     },
+                    onNavigateToCoachChat = {
+                        navController.navigate(Screen.CoachChat.route)
+                    },
+                    onNavigateToActivityFeed = {
+                        navController.navigate(Screen.ActivityFeed.route)
+                    },
+                    onNavigateToTrainingPreferences = {
+                        navController.navigate(Screen.TrainingPreferences.route)
+                    },
+                    onNavigateToShoeComparison = {
+                        navController.navigate(Screen.ShoeComparison.route)
+                    },
+                    onNavigateToFatigueAdvisor = {
+                        navController.navigate(Screen.FatigueAdvisor.route)
+                    },
                 )
             }
 
@@ -387,6 +413,37 @@ fun MainScreen(testConfig: TestConfig) {
                         }
                     },
                     testConfig = testConfig
+                )
+            }
+
+            // AMA-1148: New screens
+            composable(Screen.CoachChat.route) {
+                CoachChatScreen(
+                    onNavigateBack = { navController.popBackStack() }
+                )
+            }
+
+            composable(Screen.ActivityFeed.route) {
+                ActivityFeedScreen(
+                    onNavigateBack = { navController.popBackStack() }
+                )
+            }
+
+            composable(Screen.TrainingPreferences.route) {
+                TrainingPreferencesScreen(
+                    onNavigateBack = { navController.popBackStack() }
+                )
+            }
+
+            composable(Screen.ShoeComparison.route) {
+                ShoeComparisonScreen(
+                    onNavigateBack = { navController.popBackStack() }
+                )
+            }
+
+            composable(Screen.FatigueAdvisor.route) {
+                FatigueAdvisorScreen(
+                    onNavigateBack = { navController.popBackStack() }
                 )
             }
         }
