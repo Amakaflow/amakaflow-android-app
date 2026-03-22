@@ -21,3 +21,5 @@ dependencyResolutionManagement {
 
 rootProject.name = "AmakaFlow"
 include(":app")
+include(":shared")
+include(":wear")

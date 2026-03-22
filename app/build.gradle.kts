@@ -108,6 +108,9 @@ kover {
 }
 
 dependencies {
+    // Shared module (phone <-> watch data contracts)
+    implementation(project(":shared"))
+
     // Core Android
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
@@ -191,6 +194,10 @@ dependencies {
 
     // Sentry for error tracking
     implementation(libs.sentry.android)
+
+    // Wear OS DataLayer communication
+    implementation(libs.play.services.wearable)
+    implementation(libs.kotlinx.coroutines.play.services)
 }
 
 // Configure Sentry
