@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.amakaflow.companion.data.model.*
 import com.amakaflow.companion.domain.Result
 import com.amakaflow.companion.domain.usecase.completion.SubmitCompletionUseCase
+import com.amakaflow.companion.domain.usecase.workout.ExecutionLogBuilder
 import com.amakaflow.companion.domain.usecase.workout.GetWorkoutDetailUseCase
 import com.amakaflow.companion.domain.usecase.workout.MarkWorkoutCompletedUseCase
 import com.amakaflow.companion.debug.DebugLog
@@ -119,6 +120,9 @@ class WorkoutPlayerViewModel @Inject constructor(
     private val setLogs = mutableMapOf<String, MutableList<SetEntry>>() // exercise name -> set entries
     private var lastLoggedWeights = mutableMapOf<String, Double>() // exercise name -> last weight
 
+    // AMA-293: Execution log builder — tracks what was actually done vs planned
+    private var executionLogBuilder: ExecutionLogBuilder? = null
+
     // AMA-291: Simulation state tracking
     private var simulationSnapshot: SimulationSnapshot? = null
     private var simulatedHealthProvider: SimulatedHealthProvider? = null
@@ -174,6 +178,11 @@ class WorkoutPlayerViewModel @Inject constructor(
         workoutStartTime = Clock.System.now()
         virtualElapsedSeconds = 0
 
+        // AMA-293: Initialize execution log builder
+        executionLogBuilder = ExecutionLogBuilder(currentState.flattenedSteps)
+        executionLogBuilder?.setWorkoutStartTime(workoutStartTime!!.toEpochMilliseconds())
+        DebugLog.info("AMA-293: Initialized ExecutionLogBuilder with ${currentState.flattenedSteps.size} steps", TAG)
+
         // AMA-291: Initialize simulation state and start workout
         viewModelScope.launch {
             val snapshot = simulationSettings.getSnapshot()
@@ -226,6 +235,9 @@ class WorkoutPlayerViewModel @Inject constructor(
     fun nextStep() {
         val currentState = _uiState.value
         val step = currentState.currentStep ?: return
+
+        // AMA-293: Mark current interval as completed in execution log
+        executionLogBuilder?.completeInterval(currentState.currentStepIndex)
 
         // Check if current step has rest after it (matches iOS behavior)
         if (step.hasRestAfter && currentState.phase != WorkoutPhase.RESTING) {
@@ -282,6 +294,21 @@ class WorkoutPlayerViewModel @Inject constructor(
 
         DebugLog.debug("Logged set: $exerciseName set $setNumber, weight=${weight ?: "skipped"} $unit", TAG)
 
+        // AMA-293: Record set in execution log
+        val weightEntry = if (weight != null) {
+            WeightEntry(
+                displayLabel = "$weight $unit",
+                components = listOf(WeightComponent(source = "user", value = weight, unit = unit))
+            )
+        } else null
+        executionLogBuilder?.recordSet(
+            intervalIndex = currentState.currentStepIndex,
+            setNumber = setNumber,
+            repsPlanned = step.targetReps,
+            repsCompleted = step.targetReps, // Assume completed as prescribed
+            weight = weightEntry
+        )
+
         // Advance to next step
         nextStep()
     }
@@ -313,6 +340,13 @@ class WorkoutPlayerViewModel @Inject constructor(
         val currentState = _uiState.value
         DebugLog.info("Ending workout: reason=$reason, elapsed=${currentState.elapsedSeconds}s", TAG)
 
+        // AMA-293: Finalize execution log
+        executionLogBuilder?.setWorkoutEndTime(Clock.System.now().toEpochMilliseconds())
+        // Mark current interval as completed if still on it
+        if (reason == EndReason.COMPLETED) {
+            executionLogBuilder?.completeInterval(currentState.currentStepIndex)
+        }
+
         val workoutData = Triple(
             currentState.workout?.id,
             currentState.workout?.name,
@@ -329,6 +363,11 @@ class WorkoutPlayerViewModel @Inject constructor(
             )
         }
 
+        // AMA-293: Build execution log
+        val executionLog = executionLogBuilder?.build()
+        DebugLog.info("AMA-293: ExecutionLog built - ${executionLog?.intervals?.size} intervals, " +
+            "completed=${executionLog?.summary?.completed}, skipped=${executionLog?.summary?.skipped}", TAG)
+
         // Post completion to API if completed or user ended
         if (reason == EndReason.COMPLETED || reason == EndReason.USER_ENDED) {
             DebugLog.info("Posting workout completion...", TAG)
@@ -337,7 +376,8 @@ class WorkoutPlayerViewModel @Inject constructor(
                 workoutName = workoutData.second,
                 startedAt = workoutData.third,
                 durationSeconds = duration,
-                intervals = intervals
+                intervals = intervals,
+                executionLog = executionLog
             )
         } else {
             DebugLog.debug("Workout discarded, not posting completion", TAG)
@@ -350,6 +390,9 @@ class WorkoutPlayerViewModel @Inject constructor(
         timerJob?.cancel()
 
         val step = _uiState.value.currentStep ?: return
+
+        // AMA-293: Track interval start in execution log
+        executionLogBuilder?.startInterval(_uiState.value.currentStepIndex)
 
         // AMA-291: Simulate health data for this step
         simulateHealthForStep(step)
@@ -621,7 +664,8 @@ class WorkoutPlayerViewModel @Inject constructor(
         workoutName: String?,
         startedAt: Instant?,
         durationSeconds: Int,
-        intervals: List<WorkoutInterval>?
+        intervals: List<WorkoutInterval>?,
+        executionLog: ExecutionLog? = null
     ) {
         if (workoutId == null || startedAt == null) return
 
@@ -673,7 +717,8 @@ class WorkoutPlayerViewModel @Inject constructor(
                     ),
                     workoutStructure = workoutStructureForSubmission,
                     isSimulated = isSimulated,
-                    setLogs = setLogsForSubmission.ifEmpty { null }
+                    setLogs = setLogsForSubmission.ifEmpty { null },
+                    executionLog = executionLog  // AMA-293
                 )
                 val result = submitCompletion(submission)
                 when (result) {
