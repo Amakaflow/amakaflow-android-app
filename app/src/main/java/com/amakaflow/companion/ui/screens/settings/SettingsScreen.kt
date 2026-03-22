@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -18,6 +19,9 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -542,7 +546,13 @@ private fun ToggleSettingItem(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(AmakaSpacing.md.dp),
+                .toggleable(
+                    value = isEnabled,
+                    onValueChange = onToggle,
+                    role = Role.Switch
+                )
+                .padding(AmakaSpacing.md.dp)
+                .semantics { contentDescription = "$title. $subtitle" },
             verticalAlignment = Alignment.CenterVertically
         ) {
             Surface(
@@ -577,7 +587,7 @@ private fun ToggleSettingItem(
             }
             Switch(
                 checked = isEnabled,
-                onCheckedChange = onToggle,
+                onCheckedChange = null,
                 colors = SwitchDefaults.colors(
                     checkedThumbColor = AmakaColors.textPrimary,
                     checkedTrackColor = AmakaColors.accentBlue,

@@ -87,8 +87,8 @@ class CoachViewModelTest {
             val state = expectMostRecentItem()
             assertThat(state.error).isEqualTo("Network error")
             assertThat(state.isLoading).isFalse()
-            // User message is still added
-            assertThat(state.messages).hasSize(2) // welcome + user
+            // User message is removed on failure
+            assertThat(state.messages).hasSize(1) // welcome only
         }
     }
 
