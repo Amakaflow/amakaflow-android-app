@@ -95,7 +95,11 @@ class CoachViewModel @Inject constructor(
                     is Result.Error -> {
                         Log.e(TAG, "Coach message error: ${result.message}")
                         _uiState.update {
-                            it.copy(isLoading = false, error = result.message)
+                            it.copy(
+                                messages = it.messages.filterNot { msg -> msg.id == userMessage.id },
+                                isLoading = false,
+                                error = result.message
+                            )
                         }
                     }
                 }
