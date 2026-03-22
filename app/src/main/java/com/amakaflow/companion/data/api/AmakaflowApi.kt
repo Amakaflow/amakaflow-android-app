@@ -82,6 +82,85 @@ interface AmakaflowApi {
      */
     @POST("workouts/complete")
     suspend fun completeWorkout(@Body submission: WorkoutCompletionSubmission): Response<WorkoutCompletionSaveResponse>
+
+    // MARK: - Calendar / DayState (AMA-1148)
+
+    /**
+     * Get the state of a specific day (workouts, fatigue, conflicts).
+     */
+    @GET("calendar/day-state")
+    suspend fun getDayState(@Query("date") date: String): Response<DayStateResponse>
+
+    /**
+     * Get the state of a week starting from a given date.
+     */
+    @GET("calendar/week-state")
+    suspend fun getWeekState(@Query("start") startDate: String): Response<WeekStateResponse>
+
+    // MARK: - Planner (AMA-1148)
+
+    /**
+     * Generate a weekly training plan.
+     */
+    @POST("planner/generate-week")
+    suspend fun generateWeek(@Body request: GenerateWeekRequest): Response<GenerateWeekResponse>
+
+    // MARK: - Coach Chat (AMA-1148)
+
+    /**
+     * Send a message to the AI coach.
+     */
+    @POST("coach/message")
+    suspend fun sendCoachMessage(@Body request: CoachMessageRequest): Response<CoachMessageResponse>
+
+    // MARK: - Activity Feed (AMA-1148)
+
+    /**
+     * Get the activity feed.
+     */
+    @GET("activity/feed")
+    suspend fun getActivityFeed(
+        @Query("limit") limit: Int = 20,
+        @Query("cursor") cursor: String? = null
+    ): Response<ActivityFeedResponse>
+
+    // MARK: - Training Preferences (AMA-1148)
+
+    /**
+     * Get training preferences.
+     */
+    @GET("preferences/training")
+    suspend fun getTrainingPreferences(): Response<TrainingPreferencesResponse>
+
+    /**
+     * Update training preferences.
+     */
+    @PUT("preferences/training")
+    suspend fun updateTrainingPreferences(@Body preferences: TrainingPreferences): Response<TrainingPreferencesResponse>
+
+    // MARK: - Conflict Detection (AMA-1148)
+
+    /**
+     * Check for scheduling conflicts on a given date.
+     */
+    @GET("calendar/conflicts")
+    suspend fun getConflicts(@Query("date") date: String): Response<ConflictsResponse>
+
+    // MARK: - Shoe Comparison (AMA-1148)
+
+    /**
+     * Compare shoes based on criteria.
+     */
+    @POST("coach/shoe-comparison")
+    suspend fun compareShoes(@Body request: ShoeComparisonRequest): Response<ShoeComparisonResponse>
+
+    // MARK: - Fatigue Advisor (AMA-1148)
+
+    /**
+     * Get fatigue advice based on recent activity.
+     */
+    @GET("coach/fatigue-advisor")
+    suspend fun getFatigueAdvice(): Response<FatigueAdvisorResponse>
 }
 
 /**

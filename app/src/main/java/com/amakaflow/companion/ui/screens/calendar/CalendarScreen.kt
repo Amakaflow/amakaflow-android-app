@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -11,7 +12,9 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.CalendarViewWeek
+import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -22,6 +25,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
+import androidx.hilt.navigation.compose.hiltViewModel
+import com.amakaflow.companion.data.model.DayStatus
+import com.amakaflow.companion.data.model.DayWorkoutSummary
+import com.amakaflow.companion.data.model.ScheduleConflict
+import com.amakaflow.companion.data.model.ConflictSeverity
 import com.amakaflow.companion.ui.theme.AmakaColors
 import com.amakaflow.companion.ui.theme.AmakaCornerRadius
 import com.amakaflow.companion.ui.theme.AmakaSpacing
@@ -35,14 +43,19 @@ import java.util.Locale
 
 @Composable
 fun CalendarScreen(
-    onNavigateToWorkouts: () -> Unit = {}
+    onNavigateToWorkouts: () -> Unit = {},
+    viewModel: CalendarViewModel = hiltViewModel()
 ) {
-    var selectedDate by remember { mutableStateOf(LocalDate.now()) }
+    val state by viewModel.uiState.collectAsState()
     var showMonthPicker by remember { mutableStateOf(false) }
     val today = LocalDate.now()
+    val selectedDate = state.selectedDate
 
     // Get the week start (Sunday)
     val weekStart = selectedDate.with(TemporalAdjusters.previousOrSame(DayOfWeek.SUNDAY))
+
+    // Get current day's data
+    val currentDayState = state.dayStates[selectedDate.format(DateTimeFormatter.ISO_LOCAL_DATE)]
 
     Column(
         modifier = Modifier
@@ -58,7 +71,7 @@ fun CalendarScreen(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Spacer(modifier = Modifier.width(80.dp)) // Balance for centering
+            Spacer(modifier = Modifier.width(80.dp))
 
             Text(
                 text = "Calendar",
@@ -71,7 +84,6 @@ fun CalendarScreen(
                 horizontalArrangement = Arrangement.spacedBy(AmakaSpacing.sm.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                // Calendar grid icon - opens month picker
                 Surface(
                     modifier = Modifier
                         .size(36.dp)
@@ -93,7 +105,6 @@ fun CalendarScreen(
                     }
                 }
 
-                // Add button - navigates to workouts
                 Surface(
                     modifier = Modifier
                         .size(36.dp)
@@ -127,9 +138,7 @@ fun CalendarScreen(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            IconButton(
-                onClick = { selectedDate = selectedDate.minusWeeks(1) }
-            ) {
+            IconButton(onClick = { viewModel.navigateWeek(false) }) {
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.KeyboardArrowLeft,
                     contentDescription = "Previous week",
@@ -144,9 +153,7 @@ fun CalendarScreen(
                 color = AmakaColors.textPrimary
             )
 
-            IconButton(
-                onClick = { selectedDate = selectedDate.plusWeeks(1) }
-            ) {
+            IconButton(onClick = { viewModel.navigateWeek(true) }) {
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
                     contentDescription = "Next week",
@@ -157,7 +164,7 @@ fun CalendarScreen(
 
         Spacer(modifier = Modifier.height(AmakaSpacing.md.dp))
 
-        // Week view - Sunday to Saturday
+        // Week view - Sunday to Saturday with DayState indicators
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -169,22 +176,70 @@ fun CalendarScreen(
                 val date = weekStart.plusDays(i.toLong())
                 val isSelected = date == selectedDate
                 val isToday = date == today
+                val dayStatus = viewModel.getDayStatus(date)
+                val workoutCount = viewModel.getDayWorkoutCount(date)
 
                 WeekDayCell(
                     dayName = date.dayOfWeek.getDisplayName(TextStyle.SHORT, Locale.getDefault()),
                     dayNumber = date.dayOfMonth,
                     isSelected = isSelected,
                     isToday = isToday,
-                    onClick = { selectedDate = date }
+                    dayStatus = dayStatus,
+                    hasWorkouts = workoutCount > 0,
+                    onClick = { viewModel.selectDate(date) }
                 )
             }
         }
 
-        Spacer(modifier = Modifier.height(AmakaSpacing.xl.dp))
+        Spacer(modifier = Modifier.height(AmakaSpacing.lg.dp))
 
-        // Upcoming Workouts section
+        // Generate My Week button
+        Button(
+            onClick = { viewModel.generateWeekPlan() },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = AmakaSpacing.md.dp)
+                .testTag("generate_week_button"),
+            enabled = !state.isGeneratingPlan,
+            colors = ButtonDefaults.buttonColors(
+                containerColor = AmakaColors.accentBlue,
+                contentColor = AmakaColors.textPrimary
+            ),
+            shape = RoundedCornerShape(AmakaCornerRadius.md.dp)
+        ) {
+            if (state.isGeneratingPlan) {
+                CircularProgressIndicator(
+                    modifier = Modifier.size(20.dp),
+                    color = AmakaColors.textPrimary,
+                    strokeWidth = 2.dp
+                )
+                Spacer(modifier = Modifier.width(AmakaSpacing.sm.dp))
+            } else {
+                Icon(
+                    imageVector = Icons.Filled.AutoAwesome,
+                    contentDescription = null,
+                    modifier = Modifier.size(20.dp)
+                )
+                Spacer(modifier = Modifier.width(AmakaSpacing.sm.dp))
+            }
+            Text(
+                text = if (state.isGeneratingPlan) "Generating..." else "Generate my week",
+                style = MaterialTheme.typography.bodyLarge,
+                fontWeight = FontWeight.SemiBold
+            )
+        }
+
+        Spacer(modifier = Modifier.height(AmakaSpacing.lg.dp))
+
+        // Conflict indicators
+        if (state.conflicts.isNotEmpty()) {
+            ConflictSection(conflicts = state.conflicts)
+            Spacer(modifier = Modifier.height(AmakaSpacing.md.dp))
+        }
+
+        // Day's workouts section
         Text(
-            text = "Upcoming Workouts",
+            text = if (selectedDate == today) "Today's Workouts" else "Workouts",
             style = MaterialTheme.typography.titleLarge,
             fontWeight = FontWeight.SemiBold,
             color = AmakaColors.textPrimary,
@@ -193,22 +248,46 @@ fun CalendarScreen(
 
         Spacer(modifier = Modifier.height(AmakaSpacing.md.dp))
 
-        // Empty state
-        Surface(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = AmakaSpacing.md.dp),
-            color = AmakaColors.surface,
-            shape = RoundedCornerShape(AmakaCornerRadius.md.dp)
-        ) {
-            Text(
-                text = "No scheduled workouts",
-                style = MaterialTheme.typography.bodyLarge,
-                color = AmakaColors.textSecondary,
+        val dayWorkouts = currentDayState?.workouts ?: emptyList()
+
+        if (dayWorkouts.isEmpty()) {
+            Surface(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(AmakaSpacing.lg.dp),
-                textAlign = TextAlign.Center
+                    .padding(horizontal = AmakaSpacing.md.dp),
+                color = AmakaColors.surface,
+                shape = RoundedCornerShape(AmakaCornerRadius.md.dp)
+            ) {
+                Text(
+                    text = "No scheduled workouts",
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = AmakaColors.textSecondary,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(AmakaSpacing.lg.dp),
+                    textAlign = TextAlign.Center
+                )
+            }
+        } else {
+            LazyColumn(
+                modifier = Modifier.fillMaxWidth(),
+                contentPadding = PaddingValues(horizontal = AmakaSpacing.md.dp),
+                verticalArrangement = Arrangement.spacedBy(AmakaSpacing.sm.dp)
+            ) {
+                items(dayWorkouts) { workout ->
+                    DayWorkoutCard(workout = workout)
+                }
+            }
+        }
+
+        // Error message
+        state.error?.let { error ->
+            Spacer(modifier = Modifier.height(AmakaSpacing.md.dp))
+            Text(
+                text = error,
+                style = MaterialTheme.typography.bodyMedium,
+                color = AmakaColors.accentRed,
+                modifier = Modifier.padding(horizontal = AmakaSpacing.md.dp)
             )
         }
     }
@@ -218,7 +297,7 @@ fun CalendarScreen(
         MonthPickerDialog(
             selectedDate = selectedDate,
             onDateSelected = { date ->
-                selectedDate = date
+                viewModel.selectDate(date)
                 showMonthPicker = false
             },
             onDismiss = { showMonthPicker = false }
@@ -232,6 +311,8 @@ private fun WeekDayCell(
     dayNumber: Int,
     isSelected: Boolean,
     isToday: Boolean,
+    dayStatus: DayStatus,
+    hasWorkouts: Boolean,
     onClick: () -> Unit
 ) {
     Column(
@@ -271,6 +352,123 @@ private fun WeekDayCell(
                 )
             }
         }
+        // Day status indicator dot
+        if (hasWorkouts) {
+            Spacer(modifier = Modifier.height(2.dp))
+            Box(
+                modifier = Modifier
+                    .size(6.dp)
+                    .background(
+                        color = dayStatusColor(dayStatus),
+                        shape = CircleShape
+                    )
+            )
+        }
+    }
+}
+
+@Composable
+private fun DayWorkoutCard(workout: DayWorkoutSummary) {
+    Surface(
+        modifier = Modifier.fillMaxWidth(),
+        color = AmakaColors.surface,
+        shape = RoundedCornerShape(AmakaCornerRadius.md.dp)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(AmakaSpacing.md.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            // Sport color indicator
+            Box(
+                modifier = Modifier
+                    .width(4.dp)
+                    .height(40.dp)
+                    .background(
+                        color = AmakaColors.accentBlue,
+                        shape = RoundedCornerShape(2.dp)
+                    )
+            )
+            Spacer(modifier = Modifier.width(AmakaSpacing.md.dp))
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = workout.name,
+                    style = MaterialTheme.typography.bodyLarge,
+                    fontWeight = FontWeight.Medium,
+                    color = AmakaColors.textPrimary
+                )
+                Text(
+                    text = "${workout.duration / 60} min - ${workout.sport.name.lowercase().replaceFirstChar { it.uppercase() }}",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = AmakaColors.textSecondary
+                )
+            }
+            if (workout.completed) {
+                Text(
+                    text = "Done",
+                    style = MaterialTheme.typography.labelMedium,
+                    color = AmakaColors.accentGreen,
+                    fontWeight = FontWeight.SemiBold
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun ConflictSection(conflicts: List<ScheduleConflict>) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = AmakaSpacing.md.dp)
+    ) {
+        conflicts.forEach { conflict ->
+            Surface(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 2.dp)
+                    .testTag("conflict_indicator"),
+                color = when (conflict.severity) {
+                    ConflictSeverity.CRITICAL -> AmakaColors.accentRed.copy(alpha = 0.15f)
+                    ConflictSeverity.WARNING -> AmakaColors.accentOrange.copy(alpha = 0.15f)
+                    ConflictSeverity.INFO -> AmakaColors.accentBlue.copy(alpha = 0.15f)
+                },
+                shape = RoundedCornerShape(AmakaCornerRadius.sm.dp)
+            ) {
+                Row(
+                    modifier = Modifier.padding(AmakaSpacing.sm.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.Warning,
+                        contentDescription = null,
+                        tint = when (conflict.severity) {
+                            ConflictSeverity.CRITICAL -> AmakaColors.accentRed
+                            ConflictSeverity.WARNING -> AmakaColors.accentOrange
+                            ConflictSeverity.INFO -> AmakaColors.accentBlue
+                        },
+                        modifier = Modifier.size(16.dp)
+                    )
+                    Spacer(modifier = Modifier.width(AmakaSpacing.sm.dp))
+                    Text(
+                        text = conflict.message,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = AmakaColors.textPrimary
+                    )
+                }
+            }
+        }
+    }
+}
+
+private fun dayStatusColor(status: DayStatus): androidx.compose.ui.graphics.Color {
+    return when (status) {
+        DayStatus.REST -> AmakaColors.textTertiary
+        DayStatus.EASY -> AmakaColors.accentGreen
+        DayStatus.MODERATE -> AmakaColors.accentBlue
+        DayStatus.HARD -> AmakaColors.accentOrange
+        DayStatus.RACE -> AmakaColors.accentRed
     }
 }
 
@@ -284,7 +482,6 @@ private fun MonthPickerDialog(
     val today = LocalDate.now()
     val currentYearMonth = YearMonth.from(selectedDate)
 
-    // Generate months to display (3 months before + current + 12 months ahead)
     val months = remember {
         (-3..12).map { currentYearMonth.plusMonths(it.toLong()) }
     }
@@ -297,10 +494,7 @@ private fun MonthPickerDialog(
             color = AmakaColors.background,
             shape = RoundedCornerShape(AmakaCornerRadius.lg.dp)
         ) {
-            Column(
-                modifier = Modifier.fillMaxSize()
-            ) {
-                // Header with Cancel, Month/Year, and Today
+            Column(modifier = Modifier.fillMaxSize()) {
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -309,34 +503,21 @@ private fun MonthPickerDialog(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     TextButton(onClick = onDismiss) {
-                        Text(
-                            text = "Cancel",
-                            color = AmakaColors.textPrimary,
-                            style = MaterialTheme.typography.bodyLarge
-                        )
+                        Text(text = "Cancel", color = AmakaColors.textPrimary)
                     }
-
                     Text(
                         text = currentYearMonth.format(DateTimeFormatter.ofPattern("MMMM yyyy", Locale.getDefault())),
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.SemiBold,
                         color = AmakaColors.textPrimary
                     )
-
-                    TextButton(onClick = {
-                        onDateSelected(today)
-                    }) {
-                        Text(
-                            text = "Today",
-                            color = AmakaColors.accentBlue,
-                            style = MaterialTheme.typography.bodyLarge
-                        )
+                    TextButton(onClick = { onDateSelected(today) }) {
+                        Text(text = "Today", color = AmakaColors.accentBlue)
                     }
                 }
 
                 HorizontalDivider(color = AmakaColors.borderLight)
 
-                // Scrollable calendar months
                 LazyColumn(
                     modifier = Modifier.fillMaxSize(),
                     state = rememberLazyListState(initialFirstVisibleItemIndex = 3)
@@ -372,7 +553,6 @@ private fun MonthCalendar(
             .fillMaxWidth()
             .padding(horizontal = AmakaSpacing.md.dp)
     ) {
-        // Month header
         Text(
             text = yearMonth.format(DateTimeFormatter.ofPattern("MMMM yyyy", Locale.getDefault())),
             style = MaterialTheme.typography.titleSmall,
@@ -380,19 +560,13 @@ private fun MonthCalendar(
             modifier = Modifier.padding(vertical = AmakaSpacing.md.dp)
         )
 
-        // Day of week headers (M T W T F S S)
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceEvenly
         ) {
             listOf(
-                DayOfWeek.MONDAY,
-                DayOfWeek.TUESDAY,
-                DayOfWeek.WEDNESDAY,
-                DayOfWeek.THURSDAY,
-                DayOfWeek.FRIDAY,
-                DayOfWeek.SATURDAY,
-                DayOfWeek.SUNDAY
+                DayOfWeek.MONDAY, DayOfWeek.TUESDAY, DayOfWeek.WEDNESDAY,
+                DayOfWeek.THURSDAY, DayOfWeek.FRIDAY, DayOfWeek.SATURDAY, DayOfWeek.SUNDAY
             ).forEach { dayOfWeek ->
                 Text(
                     text = dayOfWeek.getDisplayName(TextStyle.NARROW, Locale.getDefault()),
@@ -406,12 +580,9 @@ private fun MonthCalendar(
 
         Spacer(modifier = Modifier.height(AmakaSpacing.sm.dp))
 
-        // Calendar grid
         val firstDayOfMonth = yearMonth.atDay(1)
-        // Calculate offset for Monday-starting week (Monday = 0)
-        val startDayOffset = (firstDayOfMonth.dayOfWeek.value - 1) // Monday = 0, Sunday = 6
+        val startDayOffset = (firstDayOfMonth.dayOfWeek.value - 1)
         val daysInMonth = yearMonth.lengthOfMonth()
-
         val totalCells = startDayOffset + daysInMonth
         val rows = (totalCells + 6) / 7
 
@@ -436,7 +607,6 @@ private fun MonthCalendar(
                             onClick = { onDateSelected(date) }
                         )
                     } else {
-                        // Empty cell
                         Spacer(modifier = Modifier.size(40.dp))
                     }
                 }

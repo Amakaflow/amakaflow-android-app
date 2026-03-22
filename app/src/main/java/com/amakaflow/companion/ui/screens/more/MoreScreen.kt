@@ -4,10 +4,8 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AutoAwesome
-import androidx.compose.material.icons.filled.ChevronRight
-import androidx.compose.material.icons.filled.History
-import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.automirrored.filled.CompareArrows
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -25,6 +23,11 @@ fun MoreScreen(
     onNavigateToHistory: () -> Unit,
     onNavigateToSettings: () -> Unit,
     onNavigateToAIImport: () -> Unit,
+    onNavigateToCoachChat: () -> Unit = {},
+    onNavigateToActivityFeed: () -> Unit = {},
+    onNavigateToTrainingPreferences: () -> Unit = {},
+    onNavigateToShoeComparison: () -> Unit = {},
+    onNavigateToFatigueAdvisor: () -> Unit = {},
 ) {
     Column(
         modifier = Modifier
@@ -53,21 +56,39 @@ fun MoreScreen(
             onClick = onNavigateToHistory
         )
 
-        HorizontalDivider(
-            color = AmakaColors.borderLight,
-            modifier = Modifier.padding(start = 56.dp)
-        )
+        MoreMenuDivider()
 
         MoreMenuItem(
-            icon = Icons.Filled.Settings,
-            title = "Settings",
-            onClick = onNavigateToSettings
+            icon = Icons.Filled.Psychology,
+            title = "AI Coach",
+            onClick = onNavigateToCoachChat
         )
 
-        HorizontalDivider(
-            color = AmakaColors.borderLight,
-            modifier = Modifier.padding(start = 56.dp)
+        MoreMenuDivider()
+
+        MoreMenuItem(
+            icon = Icons.Filled.DynamicFeed,
+            title = "Activity Feed",
+            onClick = onNavigateToActivityFeed
         )
+
+        MoreMenuDivider()
+
+        MoreMenuItem(
+            icon = Icons.Filled.BatteryAlert,
+            title = "Fatigue Advisor",
+            onClick = onNavigateToFatigueAdvisor
+        )
+
+        MoreMenuDivider()
+
+        MoreMenuItem(
+            icon = Icons.AutoMirrored.Filled.CompareArrows,
+            title = "Shoe Comparison",
+            onClick = onNavigateToShoeComparison
+        )
+
+        MoreMenuDivider()
 
         MoreMenuItem(
             icon = Icons.Filled.AutoAwesome,
@@ -75,8 +96,32 @@ fun MoreScreen(
             onClick = onNavigateToAIImport
         )
 
+        MoreMenuDivider()
+
+        MoreMenuItem(
+            icon = Icons.Filled.Tune,
+            title = "Training Preferences",
+            onClick = onNavigateToTrainingPreferences
+        )
+
+        MoreMenuDivider()
+
+        MoreMenuItem(
+            icon = Icons.Filled.Settings,
+            title = "Settings",
+            onClick = onNavigateToSettings
+        )
+
         HorizontalDivider(color = AmakaColors.borderLight)
     }
+}
+
+@Composable
+private fun MoreMenuDivider() {
+    HorizontalDivider(
+        color = AmakaColors.borderLight,
+        modifier = Modifier.padding(start = 56.dp)
+    )
 }
 
 @Composable
