@@ -161,7 +161,10 @@ data class WorkoutCompletionSubmission(
     @SerialName("is_simulated")
     val isSimulated: Boolean = false,
     @SerialName("set_logs")
-    val setLogs: List<ExerciseSetLog>? = null
+    val setLogs: List<ExerciseSetLog>? = null,
+    // AMA-293: Execution log — what was actually done vs planned
+    @SerialName("execution_log")
+    val executionLog: ExecutionLog? = null
 )
 
 /**
