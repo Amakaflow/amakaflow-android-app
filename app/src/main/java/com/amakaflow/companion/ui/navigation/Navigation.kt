@@ -49,6 +49,7 @@ import com.amakaflow.companion.ui.screens.settings.TranscriptionSettingsScreen
 import com.amakaflow.companion.ui.screens.aiimport.AIImportScreen
 import com.amakaflow.companion.ui.screens.coach.CoachChatScreen
 import com.amakaflow.companion.ui.screens.fatigue.FatigueAdvisorScreen
+import com.amakaflow.companion.ui.screens.followalong.FollowAlongPlayerScreen
 import com.amakaflow.companion.ui.screens.feed.ActivityFeedScreen
 import com.amakaflow.companion.ui.screens.preferences.TrainingPreferencesScreen
 import com.amakaflow.companion.ui.screens.shoes.ShoeComparisonScreen
@@ -83,6 +84,10 @@ sealed class Screen(val route: String) {
     data object AIImport : Screen("ai_import")
     data object CompletionDetail : Screen("completion/{completionId}") {
         fun createRoute(completionId: String) = "completion/$completionId"
+    }
+    // AMA-1182: Follow-along video playback
+    data object FollowAlongPlayer : Screen("follow_along/{workoutId}") {
+        fun createRoute(workoutId: String) = "follow_along/$workoutId"
     }
     // AMA-1148: New screens
     data object CoachChat : Screen("coach_chat")
@@ -261,6 +266,9 @@ fun MainScreen(testConfig: TestConfig) {
                     onNavigateBack = { navController.popBackStack() },
                     onStartWorkout = {
                         navController.navigate(Screen.WorkoutPlayer.createRoute(workoutId))
+                    },
+                    onStartFollowAlong = {
+                        navController.navigate(Screen.FollowAlongPlayer.createRoute(workoutId))
                     }
                 )
             }
@@ -271,6 +279,18 @@ fun MainScreen(testConfig: TestConfig) {
             ) { backStackEntry ->
                 val workoutId = backStackEntry.arguments?.getString("workoutId") ?: return@composable
                 WorkoutPlayerScreen(
+                    workoutId = workoutId,
+                    onDismiss = { navController.popBackStack() }
+                )
+            }
+
+            // AMA-1182: Follow-along video player
+            composable(
+                route = Screen.FollowAlongPlayer.route,
+                arguments = listOf(navArgument("workoutId") { type = NavType.StringType })
+            ) { backStackEntry ->
+                val workoutId = backStackEntry.arguments?.getString("workoutId") ?: return@composable
+                FollowAlongPlayerScreen(
                     workoutId = workoutId,
                     onDismiss = { navController.popBackStack() }
                 )
