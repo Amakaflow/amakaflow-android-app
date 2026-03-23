@@ -49,6 +49,7 @@ fun WorkoutDetailScreen(
     workoutId: String,
     onNavigateBack: () -> Unit,
     onStartWorkout: (String) -> Unit,
+    onStartFollowAlong: ((String) -> Unit)? = null,
     viewModel: WorkoutDetailViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -90,26 +91,52 @@ fun WorkoutDetailScreen(
                     modifier = Modifier.fillMaxWidth(),
                     color = AmakaColors.background
                 ) {
-                    Button(
-                        onClick = { onStartWorkout(workout.id) },
+                    Column(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(AmakaSpacing.md.dp),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = AmakaColors.accentBlue
-                        ),
-                        shape = RoundedCornerShape(AmakaCornerRadius.lg.dp)
+                        verticalArrangement = Arrangement.spacedBy(AmakaSpacing.sm.dp)
                     ) {
-                        Icon(
-                            imageVector = Icons.Filled.PlayArrow,
-                            contentDescription = null,
-                            modifier = Modifier.size(24.dp)
-                        )
-                        Spacer(modifier = Modifier.width(AmakaSpacing.sm.dp))
-                        Text(
-                            text = "Start Follow-Along",
-                            style = MaterialTheme.typography.titleMedium
-                        )
+                        Button(
+                            onClick = { onStartWorkout(workout.id) },
+                            modifier = Modifier.fillMaxWidth(),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = AmakaColors.accentBlue
+                            ),
+                            shape = RoundedCornerShape(AmakaCornerRadius.lg.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Filled.PlayArrow,
+                                contentDescription = null,
+                                modifier = Modifier.size(24.dp)
+                            )
+                            Spacer(modifier = Modifier.width(AmakaSpacing.sm.dp))
+                            Text(
+                                text = "Start Follow-Along",
+                                style = MaterialTheme.typography.titleMedium
+                            )
+                        }
+                        // AMA-1182: Follow-along video button
+                        if (onStartFollowAlong != null) {
+                            OutlinedButton(
+                                onClick = { onStartFollowAlong(workout.id) },
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .testTag("start_follow_along_video_button"),
+                                shape = RoundedCornerShape(AmakaCornerRadius.lg.dp)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Filled.OndemandVideo,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(24.dp)
+                                )
+                                Spacer(modifier = Modifier.width(AmakaSpacing.sm.dp))
+                                Text(
+                                    text = "Follow-Along Video",
+                                    style = MaterialTheme.typography.titleMedium
+                                )
+                            }
+                        }
                     }
                 }
             }
