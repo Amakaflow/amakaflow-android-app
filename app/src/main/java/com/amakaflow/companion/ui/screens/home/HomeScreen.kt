@@ -28,6 +28,8 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.amakaflow.companion.data.model.Workout
 import com.amakaflow.companion.data.model.WorkoutSport
+import com.amakaflow.companion.ui.components.RestDayButton
+import com.amakaflow.companion.ui.components.WeeklyProgressRing
 import com.amakaflow.companion.ui.theme.AmakaColors
 import com.amakaflow.companion.ui.theme.AmakaCornerRadius
 import com.amakaflow.companion.ui.theme.AmakaSpacing
@@ -93,6 +95,16 @@ fun HomeScreen(
             }
         }
 
+        // Weekly Progress Ring (AMA-1286)
+        item {
+            WeeklyProgressRing(
+                workoutsCompleted = uiState.weeklyStats.workoutCount,
+                weeklyTarget = maxOf(1, uiState.weeklyStats.workoutCount + 1), // TODO: fetch from /gamification/weekly-progress
+                ringPercentage = uiState.weeklyStats.workoutCount.toFloat() / maxOf(1, uiState.weeklyStats.workoutCount + 1).toFloat(),
+                motivationalText = weeklyMotivationalText(uiState.weeklyStats.workoutCount, maxOf(1, uiState.weeklyStats.workoutCount + 1))
+            )
+        }
+
         // Suggest Workout button (AMA-1265)
         item {
             SuggestWorkoutButton(onClick = onNavigateToSuggestWorkout)
@@ -103,6 +115,15 @@ fun HomeScreen(
             QuickActionButtons(
                 onQuickStart = { showQuickStartSheet = true },
                 onLogWorkout = onNavigateToVoiceWorkout
+            )
+        }
+
+        // Rest Day Button (AMA-1286)
+        item {
+            RestDayButton(
+                onRestDayLogged = {
+                    // TODO: call POST /gamification/rest-day
+                }
             )
         }
 
@@ -137,6 +158,16 @@ fun HomeScreen(
         item {
             Spacer(modifier = Modifier.height(AmakaSpacing.xl.dp))
         }
+    }
+}
+
+private fun weeklyMotivationalText(completed: Int, target: Int): String {
+    val remaining = maxOf(0, target - completed)
+    return when {
+        completed >= target -> "Target hit! $completed of $target \u2014 crushing it!"
+        remaining == 1 -> "$completed of $target \u2014 one more to go!"
+        completed == 0 -> "0 of $target \u2014 let\u2019s get started this week!"
+        else -> "$completed of $target \u2014 $remaining more to go!"
     }
 }
 
@@ -260,7 +291,7 @@ private fun QuickStartWorkoutItem(
                     )
                     Spacer(modifier = Modifier.width(4.dp))
                     Text(
-                        text = "${workout.formattedDuration} • ${workout.sport.displayName}",
+                        text = "${workout.formattedDuration} \u2022 ${workout.sport.displayName}",
                         style = MaterialTheme.typography.bodySmall,
                         color = AmakaColors.textTertiary
                     )
@@ -672,7 +703,7 @@ private fun SimulationModeBanner(
             )
             Spacer(modifier = Modifier.weight(1f))
             Text(
-                text = "Settings → Title × 7",
+                text = "Settings \u2192 Title \u00D7 7",
                 style = MaterialTheme.typography.labelSmall,
                 color = Color.Black.copy(alpha = 0.6f)
             )
