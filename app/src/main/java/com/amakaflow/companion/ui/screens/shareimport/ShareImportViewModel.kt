@@ -4,7 +4,6 @@ import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.amakaflow.companion.data.api.IngestorApi
-import com.amakaflow.companion.data.model.InstagramReelRequest
 import com.amakaflow.companion.data.model.UrlImportRequest
 import com.amakaflow.companion.data.worker.ImportWorker
 import com.amakaflow.companion.util.PlatformDetector
@@ -98,16 +97,7 @@ class ShareImportViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 val request = UrlImportRequest(url = item.url)
-
-                val response = when (item.platform) {
-                    PlatformDetector.Platform.YOUTUBE -> ingestorApi.importYouTube(request)
-                    PlatformDetector.Platform.INSTAGRAM -> {
-                        ingestorApi.importInstagramReel(InstagramReelRequest(url = item.url))
-                    }
-                    PlatformDetector.Platform.TIKTOK -> ingestorApi.importTikTok(request)
-                    PlatformDetector.Platform.PINTEREST -> ingestorApi.importPinterest(request)
-                    PlatformDetector.Platform.UNKNOWN -> ingestorApi.importUrl(request)
-                }
+                val response = ingestorApi.importUrl(request)
 
                 if (response.isSuccessful) {
                     val body = response.body()

@@ -483,6 +483,16 @@ data class WorkoutResponse(
     val message: String? = null
 )
 
+// AMA-1258: Share Intent URL Import
+
+/**
+ * Generic URL import request — backend auto-detects platform from URL
+ */
+@Serializable
+data class UrlImportRequest(
+    val url: String
+)
+
 // AMA-307: Sync Queue Models
 
 /**

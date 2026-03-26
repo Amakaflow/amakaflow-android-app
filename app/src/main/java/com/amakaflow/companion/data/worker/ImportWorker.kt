@@ -15,7 +15,6 @@ import androidx.work.WorkerParameters
 import com.amakaflow.companion.data.api.IngestorApi
 import com.amakaflow.companion.data.model.UrlImportRequest
 import com.amakaflow.companion.util.NotificationHelper
-import com.amakaflow.companion.util.PlatformDetector
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
 import java.util.concurrent.TimeUnit
@@ -44,7 +43,6 @@ class ImportWorker @AssistedInject constructor(
          * Enqueue a single URL import.
          */
         fun enqueue(context: Context, url: String): String {
-            val platform = PlatformDetector.detectPlatform(url)
             val workName = "import_url_${url.hashCode()}"
 
             val constraints = Constraints.Builder()
@@ -53,7 +51,6 @@ class ImportWorker @AssistedInject constructor(
 
             val inputData = Data.Builder()
                 .putString(KEY_URL, url)
-                .putString(KEY_PLATFORM, platform.name)
                 .build()
 
             val request = OneTimeWorkRequestBuilder<ImportWorker>()
@@ -91,19 +88,8 @@ class ImportWorker @AssistedInject constructor(
         NotificationHelper.showProgressNotification(applicationContext, url)
 
         return try {
-            val platform = PlatformDetector.detectPlatform(url)
             val request = UrlImportRequest(url = url)
-
-            val response = when (platform) {
-                PlatformDetector.Platform.YOUTUBE -> ingestorApi.importYouTube(request)
-                PlatformDetector.Platform.INSTAGRAM -> {
-                    val igRequest = com.amakaflow.companion.data.model.InstagramReelRequest(url = url)
-                    ingestorApi.importInstagramReel(igRequest)
-                }
-                PlatformDetector.Platform.TIKTOK -> ingestorApi.importTikTok(request)
-                PlatformDetector.Platform.PINTEREST -> ingestorApi.importPinterest(request)
-                PlatformDetector.Platform.UNKNOWN -> ingestorApi.importUrl(request)
-            }
+            val response = ingestorApi.importUrl(request)
 
             if (response.isSuccessful) {
                 val body = response.body()
