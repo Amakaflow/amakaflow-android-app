@@ -24,7 +24,14 @@ data class HomeUiState(
     val todayWorkouts: List<Workout> = emptyList(),
     val upcomingWorkouts: List<Workout> = emptyList(),
     val weeklyStats: WeeklySummary = WeeklySummary(0, 0, 0),
-    val error: String? = null
+    val error: String? = null,
+    // XP + Level (AMA-1285)
+    val xpTotal: Int = 0,
+    val currentLevel: Int = 1,
+    val levelName: String = "Newcomer",
+    val xpToNextLevel: Int = 500,
+    val xpToday: Int = 0,
+    val dailyCap: Int = 300
 )
 
 @HiltViewModel
