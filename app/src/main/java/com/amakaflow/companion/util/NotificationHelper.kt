@@ -1,6 +1,7 @@
 package com.amakaflow.companion.util
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
@@ -42,6 +43,7 @@ object NotificationHelper {
     /**
      * Show a progress notification while the import is running.
      */
+    @SuppressLint("MissingPermission") // Permission checked via hasNotificationPermission()
     fun showProgressNotification(context: Context, url: String) {
         createChannel(context)
         if (!hasNotificationPermission(context)) return
@@ -61,6 +63,7 @@ object NotificationHelper {
     /**
      * Show a success notification when import completes.
      */
+    @SuppressLint("MissingPermission") // Permission checked via hasNotificationPermission()
     fun showSuccessNotification(context: Context, workoutName: String) {
         createChannel(context)
         if (!hasNotificationPermission(context)) return
@@ -81,6 +84,7 @@ object NotificationHelper {
     /**
      * Show an error notification when import fails.
      */
+    @SuppressLint("MissingPermission") // Permission checked via hasNotificationPermission()
     fun showErrorNotification(context: Context, errorMessage: String) {
         createChannel(context)
         if (!hasNotificationPermission(context)) return
