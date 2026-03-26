@@ -161,6 +161,7 @@ interface AmakaflowApi {
      */
     @GET("coach/fatigue-advisor")
     suspend fun getFatigueAdvice(): Response<FatigueAdvisorResponse>
+
 }
 
 /**
@@ -185,4 +186,10 @@ interface IngestorApi {
      */
     @POST("workouts/parse-voice")
     suspend fun parseVoiceWorkout(@Body request: VoiceWorkoutRequest): Response<VoiceWorkoutResponse>
+
+    /**
+     * AMA-1258: Generic URL import — backend auto-detects platform from URL
+     */
+    @POST("ingest/url")
+    suspend fun importUrl(@Body request: UrlImportRequest): Response<WorkoutResponse>
 }
