@@ -45,8 +45,8 @@ jobs:
           for cls in ${{ steps.affected.outputs.result }}; do
             ARGS="$ARGS --tests $cls"
           done
-          echo "Running: ./gradlew testDebugUnitTest $ARGS"
-          ./gradlew testDebugUnitTest $ARGS
+          echo "Running: ./gradlew :app:testDebugUnitTest $ARGS"
+          ./gradlew :app:testDebugUnitTest $ARGS
 
       - name: Run full unit tests (fallback)
         if: steps.affected.outputs.result == 'FULL'
