@@ -34,6 +34,7 @@ sealed class ImportResult {
 
 /**
  * AMA-1258: ViewModel for the share intent import preview screen.
+ * AMA-1259: Also used for deep link import — same UI, different entry point.
  */
 @HiltViewModel
 class ShareImportViewModel @Inject constructor(
@@ -81,6 +82,13 @@ class ShareImportViewModel @Inject constructor(
         }
 
         _uiState.value = _uiState.value.copy(urls = items, error = null)
+    }
+
+    /**
+     * AMA-1259: Handle deep link error (missing param, unrecognized link).
+     */
+    fun handleDeepLinkError(message: String) {
+        _uiState.value = _uiState.value.copy(error = message, urls = emptyList())
     }
 
     /**
