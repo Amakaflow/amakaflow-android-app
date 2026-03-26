@@ -38,5 +38,12 @@ interface PlannerRepository {
     fun compareShoes(shoes: List<String>, sport: String? = null): Flow<Result<ShoeComparison>>
 
     // Fatigue Advisor
+
+    // Suggest Workout (AMA-1265)
+    fun suggestWorkout(
+        durationMinutes: Int? = null,
+        focusMuscleGroups: List<String>? = null,
+        notes: String? = null
+    ): Flow<Result<SuggestWorkoutResponse>>
     fun getFatigueAdvice(): Flow<Result<FatigueAdvisorResponse>>
 }

@@ -530,3 +530,29 @@ data class SyncStatusResponse(
     val success: Boolean,
     val message: String? = null
 )
+
+// MARK: - Suggest Workout (AMA-1265)
+
+@Serializable
+data class SuggestWorkoutRequest(
+    @SerialName("duration_minutes") val durationMinutes: Int? = null,
+    @SerialName("focus_muscle_groups") val focusMuscleGroups: List<String>? = null,
+    val notes: String? = null
+)
+
+@Serializable
+data class SuggestWorkoutResponse(
+    val blocks: List<WorkoutInterval>,
+    @SerialName("warm_up") val warmUp: WarmUpCooldown? = null,
+    val cooldown: WarmUpCooldown? = null,
+    val name: String? = null,
+    val sport: WorkoutSport? = null,
+    @SerialName("duration_seconds") val durationSeconds: Int? = null,
+    val description: String? = null
+)
+
+@Serializable
+data class WarmUpCooldown(
+    val seconds: Int,
+    val target: String? = null
+)

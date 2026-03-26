@@ -31,6 +31,7 @@ import com.amakaflow.companion.data.model.WorkoutSport
 import com.amakaflow.companion.ui.theme.AmakaColors
 import com.amakaflow.companion.ui.theme.AmakaCornerRadius
 import com.amakaflow.companion.ui.theme.AmakaSpacing
+import com.amakaflow.companion.ui.screens.suggest.SuggestWorkoutButton
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.Locale
@@ -38,6 +39,7 @@ import java.util.Locale
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
+    onNavigateToSuggestWorkout: () -> Unit = {},
     onNavigateToWorkouts: () -> Unit,
     onNavigateToWorkoutDetail: (String) -> Unit,
     onNavigateToVoiceWorkout: () -> Unit = {},
@@ -89,6 +91,11 @@ fun HomeScreen(
                     speed = simulationSpeed
                 )
             }
+        }
+
+        // Suggest Workout button (AMA-1265)
+        item {
+            SuggestWorkoutButton(onClick = onNavigateToSuggestWorkout)
         }
 
         // Quick action buttons (iOS style)

@@ -187,6 +187,34 @@ class PlannerRepositoryImpl @Inject constructor(
     // Fatigue Advisor
     // -------------------------------------------------------------------------
 
+
+    // -------------------------------------------------------------------------
+    // Suggest Workout (AMA-1265)
+    // -------------------------------------------------------------------------
+
+    override fun suggestWorkout(
+        durationMinutes: Int?,
+        focusMuscleGroups: List<String>?,
+        notes: String?
+    ): Flow<Result<SuggestWorkoutResponse>> = flow {
+        emit(Result.Loading)
+        try {
+            val request = SuggestWorkoutRequest(
+                durationMinutes = durationMinutes,
+                focusMuscleGroups = focusMuscleGroups,
+                notes = notes
+            )
+            val response = api.suggestWorkout(request)
+            if (response.isSuccessful && response.body() != null) {
+                emit(Result.Success(response.body()!!))
+            } else {
+                emit(Result.Error("Suggest workout failed: ${response.code()}", response.code()))
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "suggestWorkout error", e)
+            emit(Result.Error(e.message ?: "Unknown error", exception = e))
+        }
+    }
     override fun getFatigueAdvice(): Flow<Result<FatigueAdvisorResponse>> = flow {
         emit(Result.Loading)
         try {
