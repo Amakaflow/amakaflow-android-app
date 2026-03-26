@@ -7,7 +7,9 @@ on:
 jobs:
   auto-fix:
     if: >
-      github.event.review.state == 'changes_requested'
+      github.event.review.state == 'changes_requested' ||
+      (github.event.review.state == 'commented' &&
+       github.event.review.user.login == 'factory-droid[bot]')
     runs-on: ubuntu-latest
     permissions:
       contents: write
