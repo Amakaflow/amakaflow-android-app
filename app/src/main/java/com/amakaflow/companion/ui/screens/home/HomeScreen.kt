@@ -32,6 +32,7 @@ import com.amakaflow.companion.ui.theme.AmakaColors
 import com.amakaflow.companion.ui.theme.AmakaCornerRadius
 import com.amakaflow.companion.ui.theme.AmakaSpacing
 import com.amakaflow.companion.ui.screens.suggest.SuggestWorkoutButton
+import com.amakaflow.companion.ui.screens.xp.XPBarComponent
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.Locale
@@ -96,6 +97,18 @@ fun HomeScreen(
         // Suggest Workout button (AMA-1265)
         item {
             SuggestWorkoutButton(onClick = onNavigateToSuggestWorkout)
+        }
+
+        // XP progress bar (AMA-1285)
+        item {
+            XPBarComponent(
+                xpTotal = uiState.xpTotal,
+                currentLevel = uiState.currentLevel,
+                levelName = uiState.levelName,
+                xpToNextLevel = uiState.xpToNextLevel,
+                xpToday = uiState.xpToday,
+                dailyCap = uiState.dailyCap
+            )
         }
 
         // Quick action buttons (iOS style)
