@@ -46,4 +46,7 @@ interface PlannerRepository {
         notes: String? = null
     ): Flow<Result<SuggestWorkoutResponse>>
     fun getFatigueAdvice(): Flow<Result<FatigueAdvisorResponse>>
+
+    // RPE Feedback (AMA-1266)
+    suspend fun submitRPEFeedback(workoutId: String, rpe: Int, muscleSoreness: List<String>? = null, notes: String? = null): Result<RPEFeedbackResponse>
 }

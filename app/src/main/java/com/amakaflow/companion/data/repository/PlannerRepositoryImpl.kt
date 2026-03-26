@@ -229,4 +229,34 @@ class PlannerRepositoryImpl @Inject constructor(
             emit(Result.Error(e.message ?: "Unknown error", exception = e))
         }
     }
+
+    // -------------------------------------------------------------------------
+    // RPE Feedback (AMA-1266)
+    // -------------------------------------------------------------------------
+
+    override suspend fun submitRPEFeedback(
+        workoutId: String,
+        rpe: Int,
+        muscleSoreness: List<String>?,
+        notes: String?
+    ): Result<RPEFeedbackResponse> {
+        return try {
+            val request = RPEFeedbackRequest(
+                workoutId = workoutId,
+                rpe = rpe,
+                muscleSoreness = muscleSoreness,
+                notes = notes
+            )
+            val response = api.submitRPEFeedback(request)
+            if (response.isSuccessful && response.body() != null) {
+                Result.Success(response.body()!!)
+            } else {
+                Result.Error("RPE feedback failed: ${response.code()}", response.code())
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "submitRPEFeedback error", e)
+            Result.Error(e.message ?: "Unknown error", exception = e)
+        }
+    }
+
 }
