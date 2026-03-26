@@ -1,6 +1,7 @@
 package com.amakaflow.companion.data.api
 
 import com.amakaflow.companion.data.model.*
+import okhttp3.ResponseBody
 import retrofit2.Response
 import retrofit2.http.*
 
@@ -161,6 +162,51 @@ interface AmakaflowApi {
      */
     @GET("coach/fatigue-advisor")
     suspend fun getFatigueAdvice(): Response<FatigueAdvisorResponse>
+
+    // MARK: - Workout Editor (AMA-1232)
+
+    /**
+     * Create or save a workout.
+     */
+    @POST("workouts/save")
+    suspend fun saveWorkout(@Body request: WorkoutSaveRequest): Response<WorkoutResponse>
+
+    // MARK: - Workout Tags (AMA-1242)
+
+    /**
+     * Update tags on a workout.
+     */
+    @PATCH("workouts/{id}/tags")
+    suspend fun updateWorkoutTags(
+        @Path("id") id: String,
+        @Body request: UpdateTagsRequest
+    ): Response<WorkoutResponse>
+
+    // MARK: - Knowledge Library (AMA-1241)
+
+    /**
+     * List knowledge cards with pagination.
+     */
+    @GET("knowledge/cards")
+    suspend fun getKnowledgeCards(
+        @Query("limit") limit: Int = 20,
+        @Query("offset") offset: Int = 0
+    ): Response<KnowledgeCardListResponse>
+
+    /**
+     * Search knowledge cards by query.
+     */
+    @GET("knowledge/search")
+    suspend fun searchKnowledgeCards(
+        @Query("q") query: String,
+        @Query("limit") limit: Int = 20
+    ): Response<KnowledgeCardListResponse>
+
+    /**
+     * Ingest a new knowledge card (URL or text).
+     */
+    @POST("knowledge/ingest")
+    suspend fun ingestKnowledge(@Body request: KnowledgeIngestRequest): Response<KnowledgeCard>
 }
 
 /**
@@ -185,4 +231,48 @@ interface IngestorApi {
      */
     @POST("workouts/parse-voice")
     suspend fun parseVoiceWorkout(@Body request: VoiceWorkoutRequest): Response<VoiceWorkoutResponse>
+
+    /**
+     * Import a workout from an Instagram reel URL (AMA-1237)
+     */
+    @POST("ingest/instagram_reel")
+    suspend fun importInstagramReel(@Body request: InstagramReelRequest): Response<WorkoutResponse>
+
+    /**
+     * Import a workout from a YouTube URL (AMA-1239)
+     */
+    @POST("ingest/youtube")
+    suspend fun importYouTube(@Body request: UrlImportRequest): Response<WorkoutResponse>
+
+    /**
+     * Import a workout from a TikTok URL (AMA-1239)
+     */
+    @POST("ingest/tiktok")
+    suspend fun importTikTok(@Body request: UrlImportRequest): Response<WorkoutResponse>
+
+    /**
+     * Import a workout from a Pinterest URL (AMA-1239)
+     */
+    @POST("ingest/pinterest")
+    suspend fun importPinterest(@Body request: UrlImportRequest): Response<WorkoutResponse>
+
+    /**
+     * AMA-1258: Generic URL import — backend auto-detects platform from URL
+     */
+    @POST("ingest/url")
+    suspend fun importUrl(@Body request: UrlImportRequest): Response<WorkoutResponse>
+
+    // MARK: - Workout Export (AMA-1233)
+
+    /**
+     * Export a workout as a FIT file (Garmin-compatible)
+     */
+    @POST("export/fit")
+    suspend fun exportFIT(@Body request: ExportRequest): Response<ResponseBody>
+
+    /**
+     * Export a workout as a CSV file (Strong-compatible)
+     */
+    @POST("export/csv")
+    suspend fun exportCSV(@Body request: ExportRequest): Response<ResponseBody>
 }
