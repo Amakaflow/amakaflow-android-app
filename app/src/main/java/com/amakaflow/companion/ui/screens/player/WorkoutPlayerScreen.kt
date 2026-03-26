@@ -27,6 +27,9 @@ import com.amakaflow.companion.ui.components.WeightInputView
 import com.amakaflow.companion.ui.theme.AmakaColors
 import com.amakaflow.companion.ui.theme.AmakaCornerRadius
 import com.amakaflow.companion.ui.theme.AmakaSpacing
+import com.amakaflow.companion.ui.screens.rpefeedback.RPEFeedbackScreen
+import com.amakaflow.companion.ui.screens.rpefeedback.RPEFeedbackViewModel
+import com.amakaflow.companion.ui.screens.rpefeedback.RPEFeedbackUiState
 
 @Composable
 fun WorkoutPlayerScreen(
@@ -51,18 +54,33 @@ fun WorkoutPlayerScreen(
                     CircularProgressIndicator(color = AmakaColors.accentBlue)
                 }
             }
-            // Show completion screen when workout ends
+            // Show completion screen when workout ends, then RPE feedback (AMA-1266)
             uiState.phase == WorkoutPhase.ENDED && uiState.workoutCompleted -> {
-                WorkoutCompletionScreen(
-                    workoutName = uiState.workout?.name ?: "Workout",
-                    durationSeconds = uiState.elapsedSeconds,
-                    onDone = onDismiss,
-                    onRunAgain = {
-                        uiState.workout?.id?.let { id ->
-                            onRunAgain(id)
-                        } ?: onDismiss()
-                    }
-                )
+                var showRPEFeedback by remember { mutableStateOf(false) }
+
+                if (showRPEFeedback) {
+                    val rpeFeedbackViewModel: RPEFeedbackViewModel = hiltViewModel()
+                    val rpeFeedbackState by rpeFeedbackViewModel.uiState.collectAsState()
+
+                    RPEFeedbackScreen(
+                        uiState = rpeFeedbackState,
+                        onSelectOption = rpeFeedbackViewModel::selectOption,
+                        onToggleMuscle = rpeFeedbackViewModel::toggleMuscle,
+                        onSubmit = { rpeFeedbackViewModel.submit(workoutId = workoutId, onComplete = onDismiss) },
+                        onSkip = onDismiss
+                    )
+                } else {
+                    WorkoutCompletionScreen(
+                        workoutName = uiState.workout?.name ?: "Workout",
+                        durationSeconds = uiState.elapsedSeconds,
+                        onDone = { showRPEFeedback = true },
+                        onRunAgain = {
+                            uiState.workout?.id?.let { id ->
+                                onRunAgain(id)
+                            } ?: onDismiss()
+                        }
+                    )
+                }
             }
             // Dismiss immediately if discarded
             uiState.phase == WorkoutPhase.ENDED && !uiState.workoutCompleted -> {

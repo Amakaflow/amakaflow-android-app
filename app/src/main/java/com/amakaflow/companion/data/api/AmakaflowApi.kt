@@ -168,6 +168,14 @@ interface AmakaflowApi {
     suspend fun suggestWorkout(@Body request: SuggestWorkoutRequest): Response<SuggestWorkoutResponse>
     suspend fun getFatigueAdvice(): Response<FatigueAdvisorResponse>
 
+    // MARK: - RPE Feedback (AMA-1266)
+
+    /**
+     * Submit post-workout RPE feedback.
+     */
+    @POST("coach/rpe-feedback")
+    suspend fun submitRPEFeedback(@Body request: RPEFeedbackRequest): Response<RPEFeedbackResponse>
+
 }
 
 /**

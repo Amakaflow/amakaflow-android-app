@@ -336,3 +336,24 @@ data class FatigueFactor(
     val description: String? = null
 )
 
+// =============================================================================
+// RPE Feedback Models (AMA-1266)
+// =============================================================================
+
+@Serializable
+data class RPEFeedbackRequest(
+    @SerialName("workout_id")
+    val workoutId: String,
+    val rpe: Int,
+    @SerialName("muscle_soreness")
+    val muscleSoreness: List<String>? = null,
+    val notes: String? = null
+)
+
+@Serializable
+data class RPEFeedbackResponse(
+    val success: Boolean,
+    val message: String = "",
+    @SerialName("deload_recommended")
+    val deloadRecommended: Boolean? = null
+)
