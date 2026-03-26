@@ -54,6 +54,7 @@ import com.amakaflow.companion.ui.screens.feed.ActivityFeedScreen
 import com.amakaflow.companion.ui.screens.preferences.TrainingPreferencesScreen
 import com.amakaflow.companion.ui.screens.shoes.ShoeComparisonScreen
 import com.amakaflow.companion.ui.screens.voice.VoiceWorkoutScreen
+import com.amakaflow.companion.ui.screens.suggest.SuggestWorkoutScreen
 import com.amakaflow.companion.ui.screens.workouts.WorkoutDetailScreen
 import com.amakaflow.companion.ui.screens.workouts.WorkoutsScreen
 import com.amakaflow.companion.ui.theme.AmakaColors
@@ -95,6 +96,7 @@ sealed class Screen(val route: String) {
     data object TrainingPreferences : Screen("training_preferences")
     data object ShoeComparison : Screen("shoe_comparison")
     data object FatigueAdvisor : Screen("fatigue_advisor")
+    data object SuggestWorkout : Screen("suggest_workout")
 }
 
 /**
@@ -241,6 +243,9 @@ fun MainScreen(testConfig: TestConfig) {
                     },
                     onNavigateToWorkoutDetail = { workoutId ->
                         navController.navigate(Screen.WorkoutDetail.createRoute(workoutId))
+                    },
+                    onNavigateToSuggestWorkout = {
+                        navController.navigate(Screen.SuggestWorkout.route)
                     },
                     onNavigateToVoiceWorkout = {
                         navController.navigate(Screen.VoiceWorkout.route)
@@ -461,6 +466,12 @@ fun MainScreen(testConfig: TestConfig) {
                 )
             }
 
+
+            composable(Screen.SuggestWorkout.route) {
+                SuggestWorkoutScreen(
+                    onNavigateBack = { navController.popBackStack() }
+                )
+            }
             composable(Screen.FatigueAdvisor.route) {
                 FatigueAdvisorScreen(
                     onNavigateBack = { navController.popBackStack() }

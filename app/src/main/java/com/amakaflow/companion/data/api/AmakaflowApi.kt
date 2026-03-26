@@ -160,6 +160,12 @@ interface AmakaflowApi {
      * Get fatigue advice based on recent activity.
      */
     @GET("coach/fatigue-advisor")
+
+    /**
+     * Suggest a workout based on coaching profile (AMA-1265).
+     */
+    @POST("coach/suggest-workout")
+    suspend fun suggestWorkout(@Body request: SuggestWorkoutRequest): Response<SuggestWorkoutResponse>
     suspend fun getFatigueAdvice(): Response<FatigueAdvisorResponse>
 
 }
