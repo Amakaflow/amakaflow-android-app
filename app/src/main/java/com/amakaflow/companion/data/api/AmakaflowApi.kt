@@ -176,6 +176,50 @@ interface AmakaflowApi {
     @POST("coach/rpe-feedback")
     suspend fun submitRPEFeedback(@Body request: RPEFeedbackRequest): Response<RPEFeedbackResponse>
 
+    // MARK: - Social Feed (AMA-1273)
+
+    @GET("social/feed")
+    suspend fun getSocialFeed(
+        @Query("cursor") cursor: String? = null,
+        @Query("limit") limit: Int = 20
+    ): Response<SocialFeedResponse>
+
+    @POST("social/posts/{postId}/react")
+    suspend fun addSocialReaction(
+        @Path("postId") postId: String,
+        @Body request: ReactRequest
+    ): Response<Unit>
+
+    @DELETE("social/posts/{postId}/react/{emoji}")
+    suspend fun removeSocialReaction(
+        @Path("postId") postId: String,
+        @Path("emoji") emoji: String
+    ): Response<Unit>
+
+    @GET("social/posts/{postId}/comments")
+    suspend fun getSocialComments(
+        @Path("postId") postId: String
+    ): Response<SocialCommentsResponse>
+
+    @POST("social/posts/{postId}/comment")
+    suspend fun postSocialComment(
+        @Path("postId") postId: String,
+        @Body request: CommentRequest
+    ): Response<Unit>
+
+    @GET("social/settings")
+    suspend fun getSocialSettings(): Response<SocialSettings>
+
+    @PUT("social/settings")
+    suspend fun updateSocialSettings(
+        @Body settings: SocialSettings
+    ): Response<Unit>
+
+    @GET("social/users/{userId}/profile")
+    suspend fun getUserPublicProfile(
+        @Path("userId") userId: String
+    ): Response<UserPublicProfile>
+
 }
 
 /**
