@@ -20,6 +20,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.EmojiEvents
+import androidx.compose.material.icons.filled.Group
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import com.amakaflow.companion.ui.theme.AmakaColors
@@ -28,6 +29,7 @@ import com.amakaflow.companion.ui.theme.AmakaSpacing
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FeedScreen(
+    onNavigateToCrews: () -> Unit = {},
     onNavigateToUserProfile: (String) -> Unit = {},
     onNavigateToChallenges: () -> Unit = {},
     viewModel: FeedViewModel = hiltViewModel()
@@ -53,6 +55,43 @@ fun FeedScreen(
                 vertical = AmakaSpacing.md.dp
             )
         )
+
+        HorizontalDivider(color = AmakaColors.borderLight)
+
+        // Crews entry (AMA-1277)
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable(onClick = onNavigateToCrews)
+                .padding(horizontal = AmakaSpacing.md.dp, vertical = 12.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                Icons.Filled.Group,
+                contentDescription = null,
+                tint = AmakaColors.accentBlue,
+                modifier = Modifier.size(24.dp)
+            )
+            Spacer(Modifier.width(12.dp))
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    "Crews",
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.SemiBold,
+                    color = AmakaColors.textPrimary
+                )
+                Text(
+                    "Private training groups",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = AmakaColors.textSecondary
+                )
+            }
+            Icon(
+                Icons.Filled.ChevronRight,
+                contentDescription = null,
+                tint = AmakaColors.textTertiary
+            )
+        }
 
         HorizontalDivider(color = AmakaColors.borderLight)
 

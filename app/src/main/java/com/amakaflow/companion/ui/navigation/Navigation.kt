@@ -56,6 +56,10 @@ import com.amakaflow.companion.ui.screens.feed.ActivityFeedScreen
 import com.amakaflow.companion.ui.screens.social.ChallengeDetailScreen
 import com.amakaflow.companion.ui.screens.social.ChallengesScreen
 import com.amakaflow.companion.ui.screens.social.CreateChallengeScreen
+import com.amakaflow.companion.ui.screens.social.CrewsScreen
+import com.amakaflow.companion.ui.screens.social.CrewDetailScreen
+import com.amakaflow.companion.ui.screens.social.CreateCrewScreen
+import com.amakaflow.companion.ui.screens.social.JoinCrewScreen
 import com.amakaflow.companion.ui.screens.social.FeedScreen
 import com.amakaflow.companion.ui.screens.social.SocialSettingsScreen
 import com.amakaflow.companion.ui.screens.social.UserProfileScreen
@@ -116,6 +120,13 @@ sealed class Screen(val route: String) {
         fun createRoute(challengeId: String) = "challenge/$challengeId"
     }
     data object CreateChallenge : Screen("create_challenge")
+    // AMA-1277: Crews screens
+    data object Crews : Screen("crews")
+    data object CrewDetail : Screen("crew/{crewId}") {
+        fun createRoute(crewId: String) = "crew/$crewId"
+    }
+    data object CreateCrew : Screen("create_crew")
+    data object JoinCrew : Screen("join_crew")
 }
 
 /**
@@ -486,6 +497,9 @@ fun MainScreen(testConfig: TestConfig) {
                     onNavigateToUserProfile = { userId ->
                         navController.navigate(Screen.UserProfile.createRoute(userId))
                     },
+                    onNavigateToCrews = {
+                        navController.navigate(Screen.Crews.route)
+                    },
                     onNavigateToChallenges = {
                         navController.navigate(Screen.Challenges.route)
                     }
@@ -537,6 +551,45 @@ fun MainScreen(testConfig: TestConfig) {
                 CreateChallengeScreen(
                     onNavigateBack = { navController.popBackStack() }
                 )
+
+            // AMA-1277: Crews screens
+            composable(Screen.Crews.route) {
+                CrewsScreen(
+                    onNavigateBack = { navController.popBackStack() },
+                    onNavigateToDetail = { crewId ->
+                        navController.navigate(Screen.CrewDetail.createRoute(crewId))
+                    },
+                    onNavigateToCreate = {
+                        navController.navigate(Screen.CreateCrew.route)
+                    },
+                    onNavigateToJoin = {
+                        navController.navigate(Screen.JoinCrew.route)
+                    }
+                )
+            }
+
+            composable(
+                route = Screen.CrewDetail.route,
+                arguments = listOf(navArgument("crewId") { type = NavType.StringType })
+            ) { backStackEntry ->
+                val crewId = backStackEntry.arguments?.getString("crewId") ?: return@composable
+                CrewDetailScreen(
+                    crewId = crewId,
+                    onNavigateBack = { navController.popBackStack() }
+                )
+            }
+
+            composable(Screen.CreateCrew.route) {
+                CreateCrewScreen(
+                    onNavigateBack = { navController.popBackStack() }
+                )
+            }
+
+            composable(Screen.JoinCrew.route) {
+                JoinCrewScreen(
+                    onNavigateBack = { navController.popBackStack() }
+                )
+            }
             }
 
             composable(Screen.TrainingPreferences.route) {

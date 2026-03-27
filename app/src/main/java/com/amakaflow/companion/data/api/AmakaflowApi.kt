@@ -220,6 +220,37 @@ interface AmakaflowApi {
         @Path("userId") userId: String
     ): Response<UserPublicProfile>
 
+    // MARK: - Training Crews (AMA-1277)
+
+    @GET("social/crews")
+    suspend fun getMyCrews(): Response<CrewListResponse>
+
+    @GET("social/crews/{id}")
+    suspend fun getCrewDetail(
+        @Path("id") id: String
+    ): Response<CrewDetail>
+
+    @GET("social/crews/{id}/feed")
+    suspend fun getCrewFeed(
+        @Path("id") id: String
+    ): Response<CrewFeedResponse>
+
+    @POST("social/crews")
+    suspend fun createCrew(
+        @Body request: CreateCrewApiRequest
+    ): Response<Unit>
+
+    @POST("social/crews/{id}/join")
+    suspend fun joinCrew(
+        @Path("id") id: String,
+        @Body request: JoinCrewApiRequest
+    ): Response<Unit>
+
+    @DELETE("social/crews/{id}/leave")
+    suspend fun leaveCrew(
+        @Path("id") id: String
+    ): Response<Unit>
+
     // MARK: - Challenges (AMA-1276)
 
     @GET("social/challenges")
