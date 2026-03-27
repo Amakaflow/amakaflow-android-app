@@ -20,6 +20,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.amakaflow.companion.data.nutrition.FuelingStatusResponse
+import com.amakaflow.companion.ui.screens.nutrition.FuelingStatusCard
+import com.amakaflow.companion.ui.screens.nutrition.FuelingViewModel
 import com.amakaflow.companion.data.model.Workout
 import com.amakaflow.companion.data.model.WorkoutInterval
 import com.amakaflow.companion.data.model.WorkoutSport
@@ -50,9 +53,11 @@ fun WorkoutDetailScreen(
     onNavigateBack: () -> Unit,
     onStartWorkout: (String) -> Unit,
     onStartFollowAlong: ((String) -> Unit)? = null,
-    viewModel: WorkoutDetailViewModel = hiltViewModel()
+    viewModel: WorkoutDetailViewModel = hiltViewModel(),
+    fuelingViewModel: FuelingViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    val fuelingState by fuelingViewModel.uiState.collectAsState()
 
     LaunchedEffect(workoutId) {
         viewModel.loadWorkout(workoutId)
@@ -171,6 +176,7 @@ fun WorkoutDetailScreen(
             uiState.workout != null -> {
                 WorkoutDetailContent(
                     workout = uiState.workout!!,
+                    fuelingStatus = fuelingState.fuelingStatus,
                     modifier = Modifier.padding(innerPadding)
                 )
             }
@@ -181,6 +187,7 @@ fun WorkoutDetailScreen(
 @Composable
 private fun WorkoutDetailContent(
     workout: Workout,
+    fuelingStatus: FuelingStatusResponse? = null,
     modifier: Modifier = Modifier
 ) {
     val breakdownItems = remember(workout) { buildBreakdownItems(workout.intervals) }
@@ -196,6 +203,16 @@ private fun WorkoutDetailContent(
         // Header Card
         item {
             WorkoutHeaderCard(workout = workout)
+        }
+
+        // AMA-1293: Fueling Status Card (shown before workout)
+        if (fuelingStatus != null) {
+            item {
+                FuelingStatusCard(
+                    fuelingStatus = fuelingStatus,
+                    modifier = Modifier.testTag("fueling_card_in_detail")
+                )
+            }
         }
 
         // Stats Card
