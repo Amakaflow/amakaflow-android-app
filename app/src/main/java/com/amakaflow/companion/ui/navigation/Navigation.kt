@@ -68,6 +68,8 @@ import com.amakaflow.companion.ui.screens.preferences.TrainingPreferencesScreen
 import com.amakaflow.companion.ui.screens.shoes.ShoeComparisonScreen
 import com.amakaflow.companion.ui.screens.voice.VoiceWorkoutScreen
 import com.amakaflow.companion.ui.screens.suggest.SuggestWorkoutScreen
+import com.amakaflow.companion.ui.screens.nutrition.NutritionOnboardingScreen
+import com.amakaflow.companion.ui.screens.nutrition.NutritionSettingsScreen
 import com.amakaflow.companion.ui.screens.workouts.WorkoutDetailScreen
 import com.amakaflow.companion.ui.screens.workouts.WorkoutsScreen
 import com.amakaflow.companion.ui.theme.AmakaColors
@@ -133,6 +135,9 @@ sealed class Screen(val route: String) {
     data object CrewLeaderboard : Screen("leaderboard/crew/{crewId}") {
         fun createRoute(crewId: String) = "leaderboard/crew/$crewId"
     }
+    // AMA-1290-1292: Nutrition screens
+    data object NutritionSettings : Screen("nutrition_settings")
+    data object NutritionOnboarding : Screen("nutrition_onboarding")
 }
 
 /**
@@ -640,6 +645,22 @@ fun MainScreen(testConfig: TestConfig) {
             composable(Screen.FatigueAdvisor.route) {
                 FatigueAdvisorScreen(
                     onNavigateBack = { navController.popBackStack() }
+                )
+            }
+
+            // AMA-1290-1292: Nutrition screens
+            composable(Screen.NutritionSettings.route) {
+                NutritionSettingsScreen(
+                    onDismiss = { navController.popBackStack() }
+                )
+            }
+
+            composable(Screen.NutritionOnboarding.route) {
+                NutritionOnboardingScreen(
+                    onEnable = {
+                        navController.popBackStack()
+                    },
+                    onDismiss = { navController.popBackStack() }
                 )
             }
         }

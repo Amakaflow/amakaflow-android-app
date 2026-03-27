@@ -155,11 +155,15 @@ dependencies {
     // Accompanist
     implementation(libs.accompanist.permissions)
 
+    // Health Connect
+    implementation(libs.health.connect.client)
+
     // Camera & QR Scanning
     implementation(libs.camerax.core)
     implementation(libs.camerax.camera2)
     implementation(libs.camerax.lifecycle)
     implementation(libs.camerax.view)
+    implementation("com.google.guava:guava:31.1-android")
     implementation(libs.zxing.core)
 
     // Room Database
@@ -177,6 +181,8 @@ dependencies {
     testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(libs.turbine)
     testImplementation(libs.mockk)
+    testImplementation("org.mockito:mockito-core:5.8.0")
+    testImplementation("org.mockito.kotlin:mockito-kotlin:5.2.1")
     testImplementation(libs.truth)
     testImplementation(libs.okhttp.mockwebserver)
 

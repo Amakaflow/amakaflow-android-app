@@ -35,6 +35,10 @@ import com.amakaflow.companion.ui.theme.AmakaCornerRadius
 import com.amakaflow.companion.ui.theme.AmakaSpacing
 import com.amakaflow.companion.ui.screens.suggest.SuggestWorkoutButton
 import com.amakaflow.companion.ui.screens.xp.XPBarComponent
+import com.amakaflow.companion.ui.screens.nutrition.NutritionDashboardCard
+import com.amakaflow.companion.ui.screens.nutrition.NutritionViewModel
+import com.amakaflow.companion.ui.screens.nutrition.ProteinTrackerCard
+import com.amakaflow.companion.ui.screens.nutrition.WaterTrackerCard
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.Locale
@@ -46,9 +50,11 @@ fun HomeScreen(
     onNavigateToWorkouts: () -> Unit,
     onNavigateToWorkoutDetail: (String) -> Unit,
     onNavigateToVoiceWorkout: () -> Unit = {},
-    viewModel: HomeViewModel = hiltViewModel()
+    viewModel: HomeViewModel = hiltViewModel(),
+    nutritionViewModel: NutritionViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    val nutritionState by nutritionViewModel.uiState.collectAsState()
     val today = LocalDate.now()
     var showQuickStartSheet by remember { mutableStateOf(false) }
 
@@ -121,6 +127,34 @@ fun HomeScreen(
                 xpToday = uiState.xpToday,
                 dailyCap = uiState.dailyCap
             )
+        }
+
+        // AMA-1290-1292: Nutrition cards (shown when enabled)
+        if (nutritionState.isEnabled) {
+            item {
+                NutritionDashboardCard(
+                    nutrition = nutritionState.nutrition,
+                    nutritionLabel = nutritionState.nutritionLabel,
+                    displayMode = nutritionState.displayMode,
+                    source = nutritionState.nutrition.source
+                )
+            }
+
+            item {
+                ProteinTrackerCard(
+                    currentGrams = nutritionState.nutrition.proteinGrams,
+                    targetGrams = nutritionState.proteinTargetGrams,
+                    onAddProtein = { grams -> nutritionViewModel.addProtein(grams) }
+                )
+            }
+
+            item {
+                WaterTrackerCard(
+                    currentMl = nutritionState.nutrition.waterMl,
+                    targetMl = nutritionState.waterTargetMl,
+                    onAddWater = { nutritionViewModel.addWater() }
+                )
+            }
         }
 
         // Quick action buttons (iOS style)
