@@ -1,5 +1,6 @@
 package com.amakaflow.companion.ui.screens.social
 
+import kotlinx.coroutines.launch
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -166,11 +167,13 @@ private fun ConfettiLayer() {
 
         LaunchedEffect(data) {
             kotlinx.coroutines.delay(data.delay.toLong())
-            kotlinx.coroutines.launch {
-                yAnim.animateTo(data.endY, animationSpec = tween(data.duration, easing = EaseIn))
-            }
-            kotlinx.coroutines.launch {
-                alphaAnim.animateTo(0f, animationSpec = tween(data.duration, easing = EaseIn))
+            kotlinx.coroutines.coroutineScope {
+                launch {
+                    yAnim.animateTo(data.endY, animationSpec = tween(data.duration, easing = EaseIn))
+                }
+                launch {
+                    alphaAnim.animateTo(0f, animationSpec = tween(data.duration, easing = EaseIn))
+                }
             }
         }
 
