@@ -1,7 +1,12 @@
 package com.amakaflow.companion.data.api
 
 import com.amakaflow.companion.data.model.*
+import com.amakaflow.companion.data.nutrition.BarcodeProductResponse
 import com.amakaflow.companion.data.nutrition.FuelingStatusResponse
+import com.amakaflow.companion.data.nutrition.ParseTextRequest
+import com.amakaflow.companion.data.nutrition.ParseTextResponse
+import com.amakaflow.companion.data.nutrition.PhotoAnalysisRequest
+import com.amakaflow.companion.data.nutrition.PhotoAnalysisResponse
 import com.amakaflow.companion.data.nutrition.ProteinNudgeResponse
 import retrofit2.Response
 import retrofit2.http.*
@@ -303,7 +308,29 @@ interface AmakaflowApi {
     @POST("nutrition/protein-nudge/check")
     suspend fun checkProteinNudge(): Response<ProteinNudgeResponse>
 
+
+    // MARK: - AI Food Logging (AMA-1294)
+
+    /**
+     * Analyze a meal photo using Claude Vision to estimate macros.
+     */
+    @POST("nutrition/analyze-photo")
+    suspend fun analyzePhoto(@Body request: PhotoAnalysisRequest): Response<PhotoAnalysisResponse>
+
+    /**
+     * Look up a product by barcode via Open Food Facts.
+     */
+    @GET("nutrition/barcode/{code}")
+    suspend fun lookupBarcode(@Path("code") code: String): Response<BarcodeProductResponse>
+
+    /**
+     * Parse free-text food description using Claude NLP.
+     */
+    @POST("nutrition/parse-text")
+    suspend fun parseNutritionText(@Body request: ParseTextRequest): Response<ParseTextResponse>
 }
+
+
 
 /**
  * Ingestor API interface for workout voice parsing and completion queue
