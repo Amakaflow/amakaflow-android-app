@@ -1,6 +1,8 @@
 package com.amakaflow.companion.data.api
 
 import com.amakaflow.companion.data.model.*
+import com.amakaflow.companion.data.nutrition.FuelingStatusResponse
+import com.amakaflow.companion.data.nutrition.ProteinNudgeResponse
 import retrofit2.Response
 import retrofit2.http.*
 
@@ -285,6 +287,21 @@ interface AmakaflowApi {
         @Query("dimension") dimension: String = "volume",
         @Query("period") period: String = "month"
     ): Response<DimensionLeaderboardResponse>
+
+
+    // MARK: - Nutrition / Fueling (AMA-1293)
+
+    /**
+     * Get today's fueling status based on nutrition data.
+     */
+    @GET("nutrition/fueling-status")
+    suspend fun getFuelingStatus(): Response<FuelingStatusResponse>
+
+    /**
+     * Check whether a post-workout protein nudge should fire.
+     */
+    @POST("nutrition/protein-nudge/check")
+    suspend fun checkProteinNudge(): Response<ProteinNudgeResponse>
 
 }
 
