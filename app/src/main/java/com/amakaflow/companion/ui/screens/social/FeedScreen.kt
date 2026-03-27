@@ -15,6 +15,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ChevronRight
+import androidx.compose.material.icons.filled.EmojiEvents
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import com.amakaflow.companion.ui.theme.AmakaColors
 import com.amakaflow.companion.ui.theme.AmakaSpacing
 
@@ -22,6 +29,7 @@ import com.amakaflow.companion.ui.theme.AmakaSpacing
 @Composable
 fun FeedScreen(
     onNavigateToUserProfile: (String) -> Unit = {},
+    onNavigateToChallenges: () -> Unit = {},
     viewModel: FeedViewModel = hiltViewModel()
 ) {
     val state by viewModel.uiState.collectAsState()
@@ -45,6 +53,43 @@ fun FeedScreen(
                 vertical = AmakaSpacing.md.dp
             )
         )
+
+        HorizontalDivider(color = AmakaColors.borderLight)
+
+        // Challenges entry (AMA-1276)
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable(onClick = onNavigateToChallenges)
+                .padding(horizontal = AmakaSpacing.md.dp, vertical = 12.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                Icons.Filled.EmojiEvents,
+                contentDescription = null,
+                tint = Color(0xFFFFD700),
+                modifier = Modifier.size(24.dp)
+            )
+            Spacer(Modifier.width(12.dp))
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    "Challenges",
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.SemiBold,
+                    color = AmakaColors.textPrimary
+                )
+                Text(
+                    "Browse and join challenges",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = AmakaColors.textSecondary
+                )
+            }
+            Icon(
+                Icons.Filled.ChevronRight,
+                contentDescription = null,
+                tint = AmakaColors.textTertiary
+            )
+        }
 
         HorizontalDivider(color = AmakaColors.borderLight)
 

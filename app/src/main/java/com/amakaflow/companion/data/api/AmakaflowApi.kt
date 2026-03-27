@@ -220,6 +220,26 @@ interface AmakaflowApi {
         @Path("userId") userId: String
     ): Response<UserPublicProfile>
 
+    // MARK: - Challenges (AMA-1276)
+
+    @GET("social/challenges")
+    suspend fun getChallenges(): Response<ChallengesResponse>
+
+    @GET("social/challenges/{id}")
+    suspend fun getChallengeDetail(
+        @Path("id") id: String
+    ): Response<ChallengeDetailResponse>
+
+    @POST("social/challenges")
+    suspend fun createChallenge(
+        @Body request: CreateChallengeRequest
+    ): Response<Unit>
+
+    @POST("social/challenges/{id}/join")
+    suspend fun joinChallenge(
+        @Path("id") id: String
+    ): Response<Unit>
+
 }
 
 /**
