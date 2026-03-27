@@ -61,6 +61,7 @@ import com.amakaflow.companion.ui.screens.social.CrewDetailScreen
 import com.amakaflow.companion.ui.screens.social.CreateCrewScreen
 import com.amakaflow.companion.ui.screens.social.JoinCrewScreen
 import com.amakaflow.companion.ui.screens.social.FeedScreen
+import com.amakaflow.companion.ui.screens.social.LeaderboardScreen
 import com.amakaflow.companion.ui.screens.social.SocialSettingsScreen
 import com.amakaflow.companion.ui.screens.social.UserProfileScreen
 import com.amakaflow.companion.ui.screens.preferences.TrainingPreferencesScreen
@@ -127,6 +128,11 @@ sealed class Screen(val route: String) {
     }
     data object CreateCrew : Screen("create_crew")
     data object JoinCrew : Screen("join_crew")
+    // AMA-1278: Leaderboards
+    data object Leaderboard : Screen("leaderboard")
+    data object CrewLeaderboard : Screen("leaderboard/crew/{crewId}") {
+        fun createRoute(crewId: String) = "leaderboard/crew/$crewId"
+    }
 }
 
 /**
@@ -500,6 +506,9 @@ fun MainScreen(testConfig: TestConfig) {
                     onNavigateToCrews = {
                         navController.navigate(Screen.Crews.route)
                     },
+                    onNavigateToLeaderboard = {
+                        navController.navigate(Screen.Leaderboard.route)
+                    },
                     onNavigateToChallenges = {
                         navController.navigate(Screen.Challenges.route)
                     }
@@ -587,6 +596,24 @@ fun MainScreen(testConfig: TestConfig) {
 
             composable(Screen.JoinCrew.route) {
                 JoinCrewScreen(
+                    onNavigateBack = { navController.popBackStack() }
+                )
+            }
+
+            // AMA-1278: Leaderboards
+            composable(Screen.Leaderboard.route) {
+                LeaderboardScreen(
+                    onNavigateBack = { navController.popBackStack() }
+                )
+            }
+
+            composable(
+                Screen.CrewLeaderboard.route,
+                arguments = listOf(navArgument("crewId") { type = NavType.StringType })
+            ) { backStackEntry ->
+                val crewId = backStackEntry.arguments?.getString("crewId") ?: ""
+                LeaderboardScreen(
+                    crewId = crewId,
                     onNavigateBack = { navController.popBackStack() }
                 )
             }

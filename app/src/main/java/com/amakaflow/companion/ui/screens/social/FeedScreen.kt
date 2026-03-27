@@ -32,6 +32,7 @@ fun FeedScreen(
     onNavigateToCrews: () -> Unit = {},
     onNavigateToUserProfile: (String) -> Unit = {},
     onNavigateToChallenges: () -> Unit = {},
+    onNavigateToLeaderboard: () -> Unit = {},
     viewModel: FeedViewModel = hiltViewModel()
 ) {
     val state by viewModel.uiState.collectAsState()
@@ -119,6 +120,43 @@ fun FeedScreen(
                 )
                 Text(
                     "Browse and join challenges",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = AmakaColors.textSecondary
+                )
+            }
+            Icon(
+                Icons.Filled.ChevronRight,
+                contentDescription = null,
+                tint = AmakaColors.textTertiary
+            )
+        }
+
+        HorizontalDivider(color = AmakaColors.borderLight)
+
+        // Leaderboards entry (AMA-1278)
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable(onClick = onNavigateToLeaderboard)
+                .padding(horizontal = AmakaSpacing.md.dp, vertical = 12.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                Icons.Filled.EmojiEvents,
+                contentDescription = null,
+                tint = AmakaColors.accentBlue,
+                modifier = Modifier.size(24.dp)
+            )
+            Spacer(Modifier.width(12.dp))
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    "Leaderboards",
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.SemiBold,
+                    color = AmakaColors.textPrimary
+                )
+                Text(
+                    "See how you rank among friends",
                     style = MaterialTheme.typography.bodySmall,
                     color = AmakaColors.textSecondary
                 )

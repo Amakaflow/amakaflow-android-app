@@ -271,6 +271,21 @@ interface AmakaflowApi {
         @Path("id") id: String
     ): Response<Unit>
 
+    // MARK: - Leaderboards (AMA-1278)
+
+    @GET("social/leaderboards/friends")
+    suspend fun getFriendsLeaderboard(
+        @Query("dimension") dimension: String = "volume",
+        @Query("period") period: String = "month"
+    ): Response<DimensionLeaderboardResponse>
+
+    @GET("social/leaderboards/crew/{crewId}")
+    suspend fun getCrewLeaderboard(
+        @Path("crewId") crewId: String,
+        @Query("dimension") dimension: String = "volume",
+        @Query("period") period: String = "month"
+    ): Response<DimensionLeaderboardResponse>
+
 }
 
 /**
