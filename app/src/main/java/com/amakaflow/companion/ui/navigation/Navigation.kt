@@ -53,6 +53,9 @@ import com.amakaflow.companion.ui.screens.coach.CoachChatScreen
 import com.amakaflow.companion.ui.screens.fatigue.FatigueAdvisorScreen
 import com.amakaflow.companion.ui.screens.followalong.FollowAlongPlayerScreen
 import com.amakaflow.companion.ui.screens.feed.ActivityFeedScreen
+import com.amakaflow.companion.ui.screens.social.ChallengeDetailScreen
+import com.amakaflow.companion.ui.screens.social.ChallengesScreen
+import com.amakaflow.companion.ui.screens.social.CreateChallengeScreen
 import com.amakaflow.companion.ui.screens.social.FeedScreen
 import com.amakaflow.companion.ui.screens.social.SocialSettingsScreen
 import com.amakaflow.companion.ui.screens.social.UserProfileScreen
@@ -107,6 +110,12 @@ sealed class Screen(val route: String) {
     data object UserProfile : Screen("user_profile/{userId}") {
         fun createRoute(userId: String) = "user_profile/$userId"
     }
+    // AMA-1276: Challenge screens
+    data object Challenges : Screen("challenges")
+    data object ChallengeDetail : Screen("challenge/{challengeId}") {
+        fun createRoute(challengeId: String) = "challenge/$challengeId"
+    }
+    data object CreateChallenge : Screen("create_challenge")
 }
 
 /**
@@ -476,6 +485,9 @@ fun MainScreen(testConfig: TestConfig) {
                 FeedScreen(
                     onNavigateToUserProfile = { userId ->
                         navController.navigate(Screen.UserProfile.createRoute(userId))
+                    },
+                    onNavigateToChallenges = {
+                        navController.navigate(Screen.Challenges.route)
                     }
                 )
             }
@@ -493,6 +505,36 @@ fun MainScreen(testConfig: TestConfig) {
                 val userId = backStackEntry.arguments?.getString("userId") ?: return@composable
                 UserProfileScreen(
                     userId = userId,
+                    onNavigateBack = { navController.popBackStack() }
+                )
+            }
+
+            // AMA-1276: Challenge screens
+            composable(Screen.Challenges.route) {
+                ChallengesScreen(
+                    onNavigateBack = { navController.popBackStack() },
+                    onNavigateToDetail = { challengeId ->
+                        navController.navigate(Screen.ChallengeDetail.createRoute(challengeId))
+                    },
+                    onNavigateToCreate = {
+                        navController.navigate(Screen.CreateChallenge.route)
+                    }
+                )
+            }
+
+            composable(
+                route = Screen.ChallengeDetail.route,
+                arguments = listOf(navArgument("challengeId") { type = NavType.StringType })
+            ) { backStackEntry ->
+                val challengeId = backStackEntry.arguments?.getString("challengeId") ?: return@composable
+                ChallengeDetailScreen(
+                    challengeId = challengeId,
+                    onNavigateBack = { navController.popBackStack() }
+                )
+            }
+
+            composable(Screen.CreateChallenge.route) {
+                CreateChallengeScreen(
                     onNavigateBack = { navController.popBackStack() }
                 )
             }
