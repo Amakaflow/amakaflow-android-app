@@ -28,6 +28,7 @@ fun MoreScreen(
     onNavigateToTrainingPreferences: () -> Unit = {},
     onNavigateToShoeComparison: () -> Unit = {},
     onNavigateToFatigueAdvisor: () -> Unit = {},
+    onNavigateToFoodLogging: () -> Unit = {},
 ) {
     Column(
         modifier = Modifier
@@ -102,6 +103,14 @@ fun MoreScreen(
             icon = Icons.Filled.Tune,
             title = "Training Preferences",
             onClick = onNavigateToTrainingPreferences
+        )
+
+        MoreMenuDivider()
+
+        MoreMenuItem(
+            icon = Icons.Filled.Restaurant,
+            title = "Log Food",
+            onClick = onNavigateToFoodLogging
         )
 
         MoreMenuDivider()

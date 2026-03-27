@@ -201,6 +201,40 @@ class NutritionHealthConnectService @Inject constructor(
         }
     }
 
+
+    /**
+     * AMA-1294: Write a full nutrition record (calories, protein, carbs, fat) to Health Connect.
+     * Used by AI food logging to add estimated macros to daily totals.
+     */
+    suspend fun addNutritionRecord(
+        calories: Double,
+        proteinGrams: Double,
+        carbsGrams: Double,
+        fatGrams: Double
+    ): Boolean {
+        val client = healthConnectClient ?: return false
+        return try {
+            val now = java.time.Instant.now()
+            val offset = java.time.ZoneOffset.systemDefault().rules.getOffset(now)
+            val record = NutritionRecord(
+                startTime = now,
+                endTime = now.plusSeconds(1),
+                startZoneOffset = offset,
+                endZoneOffset = offset,
+                energy = Energy.kilocalories(calories),
+                protein = Mass.grams(proteinGrams),
+                totalCarbohydrate = Mass.grams(carbsGrams),
+                totalFat = Mass.grams(fatGrams)
+            )
+            client.insertRecords(listOf(record))
+            Log.d(TAG, "Added nutrition: ${calories}kcal, ${proteinGrams}g protein, ${carbsGrams}g carbs, ${fatGrams}g fat")
+            true
+        } catch (e: Exception) {
+            Log.e(TAG, "Error writing nutrition record", e)
+            false
+        }
+    }
+
     companion object {
         private const val TAG = "NutritionHC"
     }
