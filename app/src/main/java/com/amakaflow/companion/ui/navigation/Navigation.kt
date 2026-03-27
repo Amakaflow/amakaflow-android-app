@@ -6,6 +6,8 @@ import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.FitnessCenter
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.People
+import androidx.compose.material.icons.outlined.People
 import androidx.compose.material.icons.filled.MoreHoriz
 import androidx.compose.material.icons.outlined.DateRange
 import androidx.compose.material.icons.outlined.Download
@@ -51,6 +53,9 @@ import com.amakaflow.companion.ui.screens.coach.CoachChatScreen
 import com.amakaflow.companion.ui.screens.fatigue.FatigueAdvisorScreen
 import com.amakaflow.companion.ui.screens.followalong.FollowAlongPlayerScreen
 import com.amakaflow.companion.ui.screens.feed.ActivityFeedScreen
+import com.amakaflow.companion.ui.screens.social.FeedScreen
+import com.amakaflow.companion.ui.screens.social.SocialSettingsScreen
+import com.amakaflow.companion.ui.screens.social.UserProfileScreen
 import com.amakaflow.companion.ui.screens.preferences.TrainingPreferencesScreen
 import com.amakaflow.companion.ui.screens.shoes.ShoeComparisonScreen
 import com.amakaflow.companion.ui.screens.voice.VoiceWorkoutScreen
@@ -97,6 +102,11 @@ sealed class Screen(val route: String) {
     data object ShoeComparison : Screen("shoe_comparison")
     data object FatigueAdvisor : Screen("fatigue_advisor")
     data object SuggestWorkout : Screen("suggest_workout")
+    data object SocialFeed : Screen("social_feed")
+    data object SocialSettings : Screen("social_settings")
+    data object UserProfile : Screen("user_profile/{userId}") {
+        fun createRoute(userId: String) = "user_profile/$userId"
+    }
 }
 
 /**
@@ -137,6 +147,13 @@ sealed class BottomNavItem(
         selectedIcon = Icons.Filled.DateRange,
         unselectedIcon = Icons.Outlined.DateRange
     )
+    data object Social : BottomNavItem(
+        route = Screen.SocialFeed.route,
+        title = "Social",
+        testTagId = "nav_social",
+        selectedIcon = Icons.Filled.People,
+        unselectedIcon = Icons.Outlined.People
+    )
     data object More : BottomNavItem(
         route = Screen.More.route,
         title = "More",
@@ -151,6 +168,7 @@ val bottomNavItems = listOf(
     BottomNavItem.Workouts,
     BottomNavItem.Sources,
     BottomNavItem.Calendar,
+    BottomNavItem.Social,
     BottomNavItem.More
 )
 
@@ -450,6 +468,31 @@ fun MainScreen(testConfig: TestConfig) {
 
             composable(Screen.ActivityFeed.route) {
                 ActivityFeedScreen(
+                    onNavigateBack = { navController.popBackStack() }
+                )
+            }
+
+            composable(Screen.SocialFeed.route) {
+                FeedScreen(
+                    onNavigateToUserProfile = { userId ->
+                        navController.navigate(Screen.UserProfile.createRoute(userId))
+                    }
+                )
+            }
+
+            composable(Screen.SocialSettings.route) {
+                SocialSettingsScreen(
+                    onNavigateBack = { navController.popBackStack() }
+                )
+            }
+
+            composable(
+                route = Screen.UserProfile.route,
+                arguments = listOf(navArgument("userId") { type = NavType.StringType })
+            ) { backStackEntry ->
+                val userId = backStackEntry.arguments?.getString("userId") ?: return@composable
+                UserProfileScreen(
+                    userId = userId,
                     onNavigateBack = { navController.popBackStack() }
                 )
             }
