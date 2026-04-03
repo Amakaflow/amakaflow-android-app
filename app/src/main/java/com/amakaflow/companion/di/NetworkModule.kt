@@ -224,6 +224,31 @@ object NetworkModule {
             .build()
     }
 
+    /**
+     * Dedicated OkHttpClient for Coach Chat SSE streaming.
+     * Uses the dynamic mapper URL interceptor and a long read timeout
+     * to sustain the SSE connection for the duration of a response.
+     */
+    @Provides
+    @Singleton
+    @Named("coachSse")
+    fun provideCoachSseOkHttpClient(
+        authInterceptor: Interceptor,
+        authAuthenticator: AuthAuthenticator,
+        loggingInterceptor: HttpLoggingInterceptor,
+        @DynamicMapperUrl dynamicUrlInterceptor: Interceptor
+    ): OkHttpClient {
+        return OkHttpClient.Builder()
+            .addInterceptor(dynamicUrlInterceptor)
+            .addInterceptor(authInterceptor)
+            .addInterceptor(loggingInterceptor)
+            .authenticator(authAuthenticator)
+            .connectTimeout(30, TimeUnit.SECONDS)
+            .readTimeout(120, TimeUnit.SECONDS)
+            .writeTimeout(30, TimeUnit.SECONDS)
+            .build()
+    }
+
     @Provides
     @Singleton
     @Named("mapper")

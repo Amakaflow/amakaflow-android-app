@@ -86,7 +86,9 @@ fun CoachChatScreen(
                 })
             }
 
-            if (state.isLoading) {
+            // Show spinner only when loading but no streaming message exists yet
+            val streamingMsg = state.messages.lastOrNull { !it.isUser && it.isStreaming }
+            if (state.isLoading && streamingMsg == null) {
                 item {
                     Row(
                         modifier = Modifier
@@ -183,6 +185,26 @@ private fun ChatBubble(
         modifier = Modifier.fillMaxWidth(),
         horizontalAlignment = if (message.isUser) Alignment.End else Alignment.Start
     ) {
+        // Tool status indicator — shown above the bubble while a tool call is in progress
+        if (!message.isUser && message.toolStatus != null) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.padding(bottom = 4.dp)
+            ) {
+                CircularProgressIndicator(
+                    modifier = Modifier.size(12.dp),
+                    color = AmakaColors.accentBlue,
+                    strokeWidth = 1.5.dp
+                )
+                Spacer(modifier = Modifier.width(4.dp))
+                Text(
+                    text = message.toolStatus,
+                    style = MaterialTheme.typography.labelSmall,
+                    color = AmakaColors.textTertiary
+                )
+            }
+        }
+
         Surface(
             modifier = Modifier
                 .widthIn(max = 300.dp),
@@ -194,8 +216,16 @@ private fun ChatBubble(
                 bottomEnd = if (message.isUser) 4.dp else AmakaCornerRadius.md.dp
             )
         ) {
+            // Show streaming cursor when empty and still streaming
+            val displayText = if (!message.isUser && message.isStreaming && message.content.isEmpty()) {
+                "▍"
+            } else if (!message.isUser && message.isStreaming) {
+                message.content + "▍"
+            } else {
+                message.content
+            }
             Text(
-                text = message.content,
+                text = displayText,
                 style = MaterialTheme.typography.bodyMedium,
                 color = AmakaColors.textPrimary,
                 modifier = Modifier.padding(AmakaSpacing.md.dp)
