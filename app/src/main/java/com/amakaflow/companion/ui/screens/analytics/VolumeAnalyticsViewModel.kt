@@ -56,7 +56,7 @@ class VolumeAnalyticsViewModel @Inject constructor(
     private var loadJob: Job? = null
 
     init {
-        loadVolume()
+        loadJob = viewModelScope.launch { loadVolume() }
     }
 
     // ---------------------------------------------------------------------------
@@ -123,62 +123,62 @@ class VolumeAnalyticsViewModel @Inject constructor(
     // Internal
     // ---------------------------------------------------------------------------
 
-    private fun loadVolume() {
+    private suspend fun loadVolume() {
         val period = _uiState.value.selectedPeriod
         val today = LocalDate.now()
-        val currentStart = today.minusDays(period.days.toLong())
-        val previousStart = currentStart.minusDays(period.days.toLong())
+        // Use period.days - 1 so both windows are exactly period.days long (inclusive)
+        val currentStart = today.minusDays(period.days.toLong() - 1)
+        val previousEnd = currentStart.minusDays(1)
+        val previousStart = previousEnd.minusDays(period.days.toLong() - 1)
 
         _uiState.update { it.copy(isLoading = true, errorMessage = null) }
 
-        viewModelScope.launch {
-            try {
-                // Fetch current and previous period in parallel via separate launches
-                var currentData: VolumeAnalyticsResponse? = null
-                var previousData: VolumeAnalyticsResponse? = null
+        try {
+            // Fetch current and previous period in parallel via separate launches
+            var currentData: VolumeAnalyticsResponse? = null
+            var previousData: VolumeAnalyticsResponse? = null
 
-                val currentJob = launch {
-                    val resp = api.fetchVolumeAnalytics(
-                        startDate = currentStart.format(DATE_FMT),
-                        endDate = today.format(DATE_FMT),
-                        granularity = period.granularity
-                    )
-                    if (resp.isSuccessful) {
-                        currentData = resp.body()
-                    } else {
-                        Log.w(TAG, "Current period request failed: ${resp.code()}")
-                    }
+            val currentJob = viewModelScope.launch {
+                val resp = api.fetchVolumeAnalytics(
+                    startDate = currentStart.format(DATE_FMT),
+                    endDate = today.format(DATE_FMT),
+                    granularity = period.granularity
+                )
+                if (resp.isSuccessful) {
+                    currentData = resp.body()
+                } else {
+                    Log.w(TAG, "Current period request failed: ${resp.code()}")
                 }
+            }
 
-                val previousJob = launch {
-                    val resp = api.fetchVolumeAnalytics(
-                        startDate = previousStart.format(DATE_FMT),
-                        endDate = currentStart.minusDays(1).format(DATE_FMT),
-                        granularity = period.granularity
-                    )
-                    if (resp.isSuccessful) {
-                        previousData = resp.body()
-                    } else {
-                        Log.w(TAG, "Previous period request failed: ${resp.code()}")
-                    }
+            val previousJob = viewModelScope.launch {
+                val resp = api.fetchVolumeAnalytics(
+                    startDate = previousStart.format(DATE_FMT),
+                    endDate = previousEnd.format(DATE_FMT),
+                    granularity = period.granularity
+                )
+                if (resp.isSuccessful) {
+                    previousData = resp.body()
+                } else {
+                    Log.w(TAG, "Previous period request failed: ${resp.code()}")
                 }
+            }
 
-                currentJob.join()
-                previousJob.join()
+            currentJob.join()
+            previousJob.join()
 
-                _uiState.update {
-                    it.copy(
-                        currentData = currentData,
-                        previousData = previousData,
-                        isLoading = false,
-                        errorMessage = if (currentData == null) "Failed to load volume data" else null
-                    )
-                }
-            } catch (e: Exception) {
-                Log.e(TAG, "Volume analytics error", e)
-                _uiState.update {
-                    it.copy(isLoading = false, errorMessage = e.message ?: "Unexpected error")
-                }
+            _uiState.update {
+                it.copy(
+                    currentData = currentData,
+                    previousData = previousData,
+                    isLoading = false,
+                    errorMessage = if (currentData == null) "Failed to load volume data" else null
+                )
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Volume analytics error", e)
+            _uiState.update {
+                it.copy(isLoading = false, errorMessage = e.message ?: "Unexpected error")
             }
         }
     }

@@ -34,8 +34,8 @@ data class ProgramGenerationResponse(
     val jobId: String,
     val status: String,
     @SerialName("program_id")
-    val programId: String?,
-    val error: String?
+    val programId: String? = null,
+    val error: String? = null
 )
 
 @Serializable
@@ -45,6 +45,6 @@ data class ProgramGenerationStatus(
     val status: String,
     val progress: Int,
     @SerialName("program_id")
-    val programId: String?,
-    val error: String?
+    val programId: String? = null,
+    val error: String? = null
 )

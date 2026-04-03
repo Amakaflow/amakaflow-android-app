@@ -9,6 +9,7 @@ import androidx.lifecycle.viewModelScope
 import com.amakaflow.companion.data.api.AmakaflowApi
 import com.amakaflow.companion.data.model.ProgramGenerationRequest
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -207,8 +208,11 @@ class ProgramWizardViewModel @Inject constructor(
     }
 
     private suspend fun pollGenerationStatus(jobId: String) {
-        while (true) {
+        val maxAttempts = 60 // 2 min max at 2s intervals
+        var attempts = 0
+        while (attempts < maxAttempts) {
             delay(2000)
+            attempts++
             try {
                 val response = api.fetchGenerationStatus(jobId)
                 if (response.isSuccessful && response.body() != null) {
@@ -216,11 +220,19 @@ class ProgramWizardViewModel @Inject constructor(
                     state = state.copy(generationProgress = status.progress)
                     when (status.status) {
                         "completed" -> {
-                            state = state.copy(
-                                isGenerating = false,
-                                generatedProgramId = status.programId,
-                                isComplete = true
-                            )
+                            val programId = status.programId
+                            if (programId != null) {
+                                state = state.copy(
+                                    isGenerating = false,
+                                    generatedProgramId = programId,
+                                    isComplete = true
+                                )
+                            } else {
+                                state = state.copy(
+                                    isGenerating = false,
+                                    error = "Generation completed but no program was returned"
+                                )
+                            }
                             return
                         }
                         "failed" -> {
@@ -241,12 +253,16 @@ class ProgramWizardViewModel @Inject constructor(
                     )
                     return
                 }
+            } catch (e: CancellationException) {
+                throw e
             } catch (e: Exception) {
                 Log.e(TAG, "pollGenerationStatus error", e)
                 state = state.copy(isGenerating = false, error = e.message ?: "Polling error")
                 return
             }
         }
+        // Timed out waiting for terminal status
+        state = state.copy(isGenerating = false, error = "Generation timed out — please try again")
     }
 
     fun clearError() {

@@ -40,13 +40,6 @@ fun BulkImportWizardScreen(
 ) {
     val state = viewModel.state
 
-    // Navigate back to more screen on completion
-    LaunchedEffect(state.importStatus?.status) {
-        if (state.importStatus?.status == "completed") {
-            onImportComplete()
-        }
-    }
-
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -138,7 +131,7 @@ fun BulkImportWizardScreen(
                 BulkImportStep.DETECTION -> DetectionStep(state, viewModel)
                 BulkImportStep.EXERCISE_MATCHING -> ExerciseMatchingStep(state, viewModel)
                 BulkImportStep.PREVIEW -> PreviewStep(state, viewModel)
-                BulkImportStep.IMPORT -> ImportProgressStep(state)
+                BulkImportStep.IMPORT -> ImportProgressStep(state, onImportComplete)
             }
         }
     }
@@ -700,7 +693,7 @@ private fun PreviewWorkoutCard(workout: PreviewWorkout, selected: Boolean, onTog
 // =====================================================================
 
 @Composable
-private fun ImportProgressStep(state: BulkImportState) {
+private fun ImportProgressStep(state: BulkImportState, onImportComplete: () -> Unit = {}) {
     val importStatus = state.importStatus
 
     Column(
@@ -762,6 +755,9 @@ private fun ImportProgressStep(state: BulkImportState) {
                             )
                         }
                     }
+                }
+                TextButton(onClick = onImportComplete) {
+                    Text("Done", color = AmakaColors.accentBlue)
                 }
             }
             importStatus.status == "failed" -> {

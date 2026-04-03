@@ -130,7 +130,7 @@ class CoachViewModel @Inject constructor(
                     }
 
                     var pendingEvent = ""
-                    var pendingData = ""
+                    val pendingData = StringBuilder()
 
                     while (!source.exhausted()) {
                         val line = source.readUtf8Line() ?: break
@@ -139,16 +139,19 @@ class CoachViewModel @Inject constructor(
                                 pendingEvent = line.removePrefix("event: ").trim()
                             }
                             line.startsWith("data: ") -> {
-                                pendingData = line.removePrefix("data: ").trim()
+                                // Accumulate multi-line data fields per SSE spec
+                                if (pendingData.isNotEmpty()) pendingData.append("\n")
+                                pendingData.append(line.removePrefix("data: "))
                             }
                             line.isEmpty() -> {
                                 // Blank line = dispatch the buffered event
                                 val eventName = pendingEvent.ifEmpty { "message" }
-                                if (pendingData.isNotEmpty()) {
-                                    handleSseEvent(eventName, pendingData, assistantMessageId)
+                                val dataStr = pendingData.toString().trim()
+                                if (dataStr.isNotEmpty()) {
+                                    handleSseEvent(eventName, dataStr, assistantMessageId)
                                 }
                                 pendingEvent = ""
-                                pendingData = ""
+                                pendingData.clear()
                             }
                         }
                     }

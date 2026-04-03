@@ -9,6 +9,7 @@ import androidx.lifecycle.viewModelScope
 import com.amakaflow.companion.data.api.IngestorApi
 import com.amakaflow.companion.data.model.*
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -89,8 +90,9 @@ class BulkImportViewModel @Inject constructor(
             try {
                 val request = BulkDetectRequest(urls = urls)
                 val response = ingestorApi.detectImport(request)
-                if (response.isSuccessful && response.body() != null) {
-                    val items = response.body()!!.items
+                val detectBody = response.body()
+                if (response.isSuccessful && detectBody != null && detectBody.success) {
+                    val items = detectBody.items
                     state = state.copy(
                         isLoading = false,
                         detectedItems = items,
@@ -100,7 +102,7 @@ class BulkImportViewModel @Inject constructor(
                 } else {
                     state = state.copy(
                         isLoading = false,
-                        error = "Detection failed: ${response.code()}"
+                        error = if (response.isSuccessful) "Detection failed" else "Detection failed: ${response.code()}"
                     )
                 }
             } catch (e: Exception) {
@@ -129,8 +131,9 @@ class BulkImportViewModel @Inject constructor(
             try {
                 val request = BulkMatchRequest(items = selected)
                 val response = ingestorApi.matchExercises(request)
-                if (response.isSuccessful && response.body() != null) {
-                    val matches = response.body()!!.matches
+                val matchBody = response.body()
+                if (response.isSuccessful && matchBody != null && matchBody.success) {
+                    val matches = matchBody.matches
                     state = state.copy(
                         isLoading = false,
                         exerciseMatches = matches,
@@ -140,7 +143,7 @@ class BulkImportViewModel @Inject constructor(
                 } else {
                     state = state.copy(
                         isLoading = false,
-                        error = "Matching failed: ${response.code()}"
+                        error = if (response.isSuccessful) "Matching failed" else "Matching failed: ${response.code()}"
                     )
                 }
             } catch (e: Exception) {
@@ -169,8 +172,9 @@ class BulkImportViewModel @Inject constructor(
                     matches = state.resolvedMatches
                 )
                 val response = ingestorApi.previewImport(request)
-                if (response.isSuccessful && response.body() != null) {
-                    val workouts = response.body()!!.workouts
+                val previewBody = response.body()
+                if (response.isSuccessful && previewBody != null && previewBody.success) {
+                    val workouts = previewBody.workouts
                     state = state.copy(
                         isLoading = false,
                         previewWorkouts = workouts,
@@ -180,7 +184,7 @@ class BulkImportViewModel @Inject constructor(
                 } else {
                     state = state.copy(
                         isLoading = false,
-                        error = "Preview failed: ${response.code()}"
+                        error = if (response.isSuccessful) "Preview failed" else "Preview failed: ${response.code()}"
                     )
                 }
             } catch (e: Exception) {
@@ -213,14 +217,14 @@ class BulkImportViewModel @Inject constructor(
                     matches = state.resolvedMatches
                 )
                 val response = ingestorApi.executeImport(request)
-                if (response.isSuccessful && response.body() != null) {
-                    val body = response.body()!!
-                    state = state.copy(isLoading = false, importJobId = body.jobId)
-                    pollImportStatus(body.jobId)
+                val executeBody = response.body()
+                if (response.isSuccessful && executeBody != null && executeBody.success) {
+                    state = state.copy(isLoading = false, importJobId = executeBody.jobId)
+                    pollImportStatus(executeBody.jobId)
                 } else {
                     state = state.copy(
                         isLoading = false,
-                        error = "Import failed: ${response.code()}"
+                        error = if (response.isSuccessful) "Import failed" else "Import failed: ${response.code()}"
                     )
                 }
             } catch (e: Exception) {
@@ -231,8 +235,11 @@ class BulkImportViewModel @Inject constructor(
     }
 
     private suspend fun pollImportStatus(jobId: String) {
-        while (true) {
+        val maxAttempts = 60 // 2 min max at 2s intervals
+        var attempts = 0
+        while (attempts < maxAttempts) {
             delay(2000)
+            attempts++
             try {
                 val response = ingestorApi.fetchImportStatus(jobId)
                 if (response.isSuccessful && response.body() != null) {
@@ -245,12 +252,16 @@ class BulkImportViewModel @Inject constructor(
                     state = state.copy(error = "Status check failed: ${response.code()}")
                     return
                 }
+            } catch (e: CancellationException) {
+                throw e
             } catch (e: Exception) {
                 Log.e(TAG, "pollImportStatus error", e)
                 state = state.copy(error = e.message ?: "Status polling error")
                 return
             }
         }
+        // Timed out waiting for terminal status
+        state = state.copy(isLoading = false, error = "Import timed out — check back later")
     }
 
     // -------------------------------------------------------------------------

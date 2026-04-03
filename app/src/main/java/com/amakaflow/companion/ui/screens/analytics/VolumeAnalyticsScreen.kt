@@ -205,12 +205,15 @@ fun VolumeAnalyticsScreen(
             if (sorted.isNotEmpty()) {
                 item { SectionHeader("Muscle Group Breakdown") }
                 val max = sorted.first().second
+                // Build a stable color map using the same alphabetical ordering the chart uses
+                val chartMuscleOrder = sorted.map { it.first }.sorted()
+                val muscleColorIndex = chartMuscleOrder.withIndex().associate { (idx, name) -> name to idx }
                 items(sorted) { (muscle, volume) ->
                     MuscleGroupRow(
                         muscle = muscle,
                         volume = volume,
                         maxVolume = max,
-                        colorIndex = sorted.indexOfFirst { it.first == muscle }
+                        colorIndex = muscleColorIndex[muscle] ?: 0
                     )
                 }
             }

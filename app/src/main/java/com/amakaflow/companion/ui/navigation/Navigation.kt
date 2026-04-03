@@ -244,10 +244,10 @@ fun AmakaFlowBottomNavBar(
                     if (!selected) {
                         navController.navigate(item.route) {
                             popUpTo(navController.graph.findStartDestination().id) {
-                                saveState = false
+                                saveState = true
                             }
                             launchSingleTop = true
-                            restoreState = false
+                            restoreState = true
                         }
                     }
                 },
@@ -277,8 +277,13 @@ fun MainScreen(testConfig: TestConfig) {
     val effectivelyPaired = settingsState.isPaired ||
         (testConfig.isTestModeEnabled && testConfig.skipOnboarding)
 
-    // Show bottom bar only when paired and not on pairing screen
-    val showBottomBar = effectivelyPaired && currentRoute != Screen.Pairing.route
+    // Show bottom bar only when paired and not on pairing screen or wizard flows
+    val hideBottomBarRoutes = setOf(
+        Screen.Pairing.route,
+        Screen.ProgramWizard.route,
+        Screen.BulkImport.route,
+    )
+    val showBottomBar = effectivelyPaired && currentRoute !in hideBottomBarRoutes
 
     // Start destination based on pairing state (test mode can bypass pairing)
     val startDestination = if (effectivelyPaired) Screen.Home.route else Screen.Pairing.route
@@ -592,6 +597,7 @@ fun MainScreen(testConfig: TestConfig) {
                 CreateChallengeScreen(
                     onNavigateBack = { navController.popBackStack() }
                 )
+            }
 
             // AMA-1277: Crews screens
             composable(Screen.Crews.route) {
@@ -648,7 +654,6 @@ fun MainScreen(testConfig: TestConfig) {
                     crewId = crewId,
                     onNavigateBack = { navController.popBackStack() }
                 )
-            }
             }
 
             composable(Screen.TrainingPreferences.route) {

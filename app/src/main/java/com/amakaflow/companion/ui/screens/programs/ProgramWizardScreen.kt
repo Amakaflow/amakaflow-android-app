@@ -646,6 +646,7 @@ private fun ReviewStep(state: ProgramWizardState, viewModel: ProgramWizardViewMo
                 ReviewRow("Equipment", equipment)
                 if (state.injuries.isNotBlank()) ReviewRow("Limitations", state.injuries)
                 if (state.focusAreas.isNotEmpty()) ReviewRow("Focus areas", state.focusAreas.joinToString(", "))
+                if (state.avoidExercises.isNotEmpty()) ReviewRow("Avoid exercises", state.avoidExercises.joinToString(", "))
             }
         }
 

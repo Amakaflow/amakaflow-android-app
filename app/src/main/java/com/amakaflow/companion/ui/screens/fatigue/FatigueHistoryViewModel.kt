@@ -9,6 +9,7 @@ import androidx.lifecycle.viewModelScope
 import com.amakaflow.companion.data.api.AmakaflowApi
 import com.amakaflow.companion.data.model.DayState
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
 import kotlinx.datetime.DateTimeUnit
@@ -44,6 +45,8 @@ class FatigueHistoryViewModel @Inject constructor(
     var error by mutableStateOf<String?>(null)
         private set
 
+    private var loadJob: Job? = null
+
     // Computed stats
     val averageScore: Double
         get() {
@@ -57,7 +60,7 @@ class FatigueHistoryViewModel @Inject constructor(
     val yellowDays: Int
         get() = dayStates.count { score ->
             val r = score.readinessScore ?: 0.0
-            r in 40.0..69.9
+            r >= 40.0 && r < 70.0
         }
 
     val redDays: Int
@@ -68,13 +71,15 @@ class FatigueHistoryViewModel @Inject constructor(
     }
 
     fun loadHistory() {
-        viewModelScope.launch {
+        loadJob?.cancel()
+        loadJob = viewModelScope.launch {
             isLoading = true
             error = null
             try {
                 val tz = TimeZone.currentSystemDefault()
                 val today = Clock.System.now().toLocalDateTime(tz).date
-                val fromDate = today.minus(selectedRange.days, DateTimeUnit.DAY)
+                // Use days - 1 so the window is exactly selectedRange.days long (inclusive)
+                val fromDate = today.minus(selectedRange.days - 1, DateTimeUnit.DAY)
 
                 // Use getDayState iteratively or getWeekState in batches
                 // Use week-state for the range to minimize API calls
