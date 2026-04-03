@@ -103,6 +103,8 @@ class FatigueHistoryViewModel @Inject constructor(
                     .sortedByDescending { it.date }
 
                 dayStates = deduplicated
+            } catch (e: kotlinx.coroutines.CancellationException) {
+                throw e
             } catch (e: Exception) {
                 Log.e(TAG, "loadHistory error", e)
                 error = e.message ?: "Failed to load history"

@@ -706,6 +706,21 @@ private fun ImportProgressStep(state: BulkImportState, onImportComplete: () -> U
         Spacer(modifier = Modifier.height(AmakaSpacing.lg.dp))
 
         when {
+            state.error != null && (importStatus == null || (importStatus.status != "completed" && importStatus.status != "failed")) -> {
+                // Polling failed or timed out — show error instead of a stale spinner
+                Text(
+                    text = "Import Error",
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold,
+                    color = AmakaColors.accentRed
+                )
+                Text(
+                    text = state.error,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = AmakaColors.textSecondary,
+                    textAlign = TextAlign.Center
+                )
+            }
             importStatus == null || (importStatus.status != "completed" && importStatus.status != "failed") -> {
                 CircularProgressIndicator(color = AmakaColors.accentBlue)
                 Text(

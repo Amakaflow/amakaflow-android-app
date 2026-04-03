@@ -41,8 +41,19 @@ class CoachViewModel @Inject constructor(
     @Named("coachSse") private val httpClient: OkHttpClient
 ) : ViewModel() {
 
+    /** Overrides the base URL for unit tests (MockWebServer). Leave null in production. */
+    internal var testBaseUrl: String? = null
+
     private val _uiState = MutableStateFlow(CoachUiState())
     val uiState: StateFlow<CoachUiState> = _uiState.asStateFlow()
+
+    @Volatile
+    private var activeCall: okhttp3.Call? = null
+
+    override fun onCleared() {
+        super.onCleared()
+        activeCall?.cancel()
+    }
 
     init {
         // Start with a welcome message
@@ -78,7 +89,7 @@ class CoachViewModel @Inject constructor(
 
         viewModelScope.launch(Dispatchers.IO) {
             try {
-                val baseUrl = AppEnvironment.current.mapperApiUrl.trimEnd('/')
+                val baseUrl = (testBaseUrl ?: AppEnvironment.current.mapperApiUrl).trimEnd('/')
                 val body = JSONObject().apply {
                     put("message", message)
                     _uiState.value.sessionId?.let { put("session_id", it) }
@@ -91,7 +102,9 @@ class CoachViewModel @Inject constructor(
                     .header("Accept", "text/event-stream")
                     .build()
 
-                httpClient.newCall(request).execute().use { response ->
+                val call = httpClient.newCall(request)
+                activeCall = call
+                call.execute().use { response ->
                     if (!response.isSuccessful) {
                         val detail = response.body?.string()?.take(200) ?: ""
                         Log.e(TAG, "SSE error HTTP ${response.code}: $detail")

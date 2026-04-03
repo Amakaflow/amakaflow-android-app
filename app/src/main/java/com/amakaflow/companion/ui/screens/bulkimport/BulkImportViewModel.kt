@@ -206,10 +206,12 @@ class BulkImportViewModel @Inject constructor(
 
     fun executeImport() {
         viewModelScope.launch {
+            // Clear any stale job state before starting a fresh import
             state = state.copy(
                 isLoading = true,
                 error = null,
-                currentStep = BulkImportStep.IMPORT
+                importJobId = null,
+                importStatus = null
             )
             try {
                 val request = BulkExecuteRequest(
@@ -219,7 +221,12 @@ class BulkImportViewModel @Inject constructor(
                 val response = ingestorApi.executeImport(request)
                 val executeBody = response.body()
                 if (response.isSuccessful && executeBody != null && executeBody.success) {
-                    state = state.copy(isLoading = false, importJobId = executeBody.jobId)
+                    // Only move to IMPORT step once a valid job has been created
+                    state = state.copy(
+                        isLoading = false,
+                        importJobId = executeBody.jobId,
+                        currentStep = BulkImportStep.IMPORT
+                    )
                     pollImportStatus(executeBody.jobId)
                 } else {
                     state = state.copy(
@@ -269,6 +276,8 @@ class BulkImportViewModel @Inject constructor(
     // -------------------------------------------------------------------------
 
     fun goBack() {
+        // Block back-navigation while a request or import is in progress
+        if (state.isLoading) return
         val prevIndex = state.currentStep.index - 1
         val prevStep = BulkImportStep.values().getOrNull(prevIndex) ?: return
         state = state.copy(currentStep = prevStep, error = null)

@@ -200,6 +200,8 @@ class ProgramWizardViewModel @Inject constructor(
                         error = "Failed to start generation: ${response.code()}"
                     )
                 }
+            } catch (e: CancellationException) {
+                throw e
             } catch (e: Exception) {
                 Log.e(TAG, "generateProgram error", e)
                 state = state.copy(isGenerating = false, error = e.message ?: "Unknown error")

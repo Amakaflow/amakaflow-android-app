@@ -414,23 +414,35 @@ private fun StackedBarChartCard(dataPoints: List<VolumeDataPoint>) {
                 }
             }
 
-            // X-axis labels
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                val labelPeriods = if (periods.size <= 7) periods else {
-                    // Show ~5 evenly spaced labels
-                    val step = (periods.size / 4).coerceAtLeast(1)
-                    periods.filterIndexed { idx, _ -> idx % step == 0 || idx == periods.lastIndex }
+            // X-axis labels — each label is centered under its actual bar by using
+            // weighted spacers that mirror the bar grid, so down-sampled labels
+            // never annotate the wrong bar.
+            val barCount = periods.size
+            if (barCount > 0) {
+                val labelIndices = if (barCount <= 7) {
+                    periods.indices.toList()
+                } else {
+                    val step = (barCount / 4).coerceAtLeast(1)
+                    periods.indices.filter { it % step == 0 || it == periods.lastIndex }
                 }
-                labelPeriods.forEach { p ->
-                    Text(
-                        text = formatPeriodLabel(p),
-                        style = MaterialTheme.typography.labelSmall,
-                        color = AmakaColors.textTertiary,
-                        fontSize = 9.sp
-                    )
+                Row(modifier = Modifier.fillMaxWidth()) {
+                    labelIndices.forEachIndexed { labelPos, barIdx ->
+                        // Weight the spacer before this label to position it at the bar center
+                        val prevBarIdx = if (labelPos == 0) -1 else labelIndices[labelPos - 1]
+                        val spacerWeight = (barIdx - prevBarIdx - 1).coerceAtLeast(0) + 0.5f
+                        Spacer(modifier = Modifier.weight(spacerWeight))
+                        Text(
+                            text = formatPeriodLabel(periods[barIdx]),
+                            style = MaterialTheme.typography.labelSmall,
+                            color = AmakaColors.textTertiary,
+                            fontSize = 9.sp
+                        )
+                        // After the last label, fill the remaining space
+                        if (labelPos == labelIndices.lastIndex) {
+                            val trailingWeight = (barCount - 1 - barIdx).coerceAtLeast(0) + 0.5f
+                            Spacer(modifier = Modifier.weight(trailingWeight))
+                        }
+                    }
                 }
             }
         }
