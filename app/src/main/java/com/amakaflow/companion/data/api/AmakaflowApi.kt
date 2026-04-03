@@ -227,6 +227,12 @@ interface AmakaflowApi {
         @Path("userId") userId: String
     ): Response<UserPublicProfile>
 
+    @POST("social/users/{userId}/follow")
+    suspend fun followUser(@Path("userId") userId: String): Response<Unit>
+
+    @POST("social/users/{userId}/unfollow")
+    suspend fun unfollowUser(@Path("userId") userId: String): Response<Unit>
+
     // MARK: - Training Crews (AMA-1277)
 
     @GET("social/crews")
