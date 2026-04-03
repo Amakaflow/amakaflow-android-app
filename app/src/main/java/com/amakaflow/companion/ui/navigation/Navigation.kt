@@ -74,6 +74,9 @@ import com.amakaflow.companion.ui.screens.nutrition.NutritionOnboardingScreen
 import com.amakaflow.companion.ui.screens.nutrition.NutritionSettingsScreen
 import com.amakaflow.companion.ui.screens.workouts.WorkoutDetailScreen
 import com.amakaflow.companion.ui.screens.workouts.WorkoutsScreen
+import com.amakaflow.companion.ui.screens.programs.ProgramWizardScreen
+import com.amakaflow.companion.ui.screens.fatigue.FatigueHistoryScreen
+import com.amakaflow.companion.ui.screens.bulkimport.BulkImportWizardScreen
 import com.amakaflow.companion.ui.theme.AmakaColors
 
 /**
@@ -143,6 +146,10 @@ sealed class Screen(val route: String) {
     data object NutritionOnboarding : Screen("nutrition_onboarding")
     // Volume Analytics
     data object VolumeAnalytics : Screen("volume_analytics")
+    // AMA-1408: native parity batch 1
+    data object ProgramWizard : Screen("program_wizard")
+    data object FatigueHistory : Screen("fatigue_history")
+    data object BulkImport : Screen("bulk_import")
 }
 
 /**
@@ -409,6 +416,15 @@ fun MainScreen(testConfig: TestConfig) {
                     },
                     onNavigateToVolumeAnalytics = {
                         navController.navigate(Screen.VolumeAnalytics.route)
+                    },
+                    onNavigateToProgramWizard = {
+                        navController.navigate(Screen.ProgramWizard.route)
+                    },
+                    onNavigateToFatigueHistory = {
+                        navController.navigate(Screen.FatigueHistory.route)
+                    },
+                    onNavigateToBulkImport = {
+                        navController.navigate(Screen.BulkImport.route)
                     },
                 )
             }
@@ -686,6 +702,29 @@ fun MainScreen(testConfig: TestConfig) {
             composable(Screen.VolumeAnalytics.route) {
                 VolumeAnalyticsScreen(
                     onNavigateBack = { navController.popBackStack() }
+                )
+            }
+
+            // AMA-1408: Program Wizard
+            composable(Screen.ProgramWizard.route) {
+                ProgramWizardScreen(
+                    onNavigateBack = { navController.popBackStack() },
+                    onProgramCreated = { _ -> navController.popBackStack() }
+                )
+            }
+
+            // AMA-1408: Fatigue History
+            composable(Screen.FatigueHistory.route) {
+                FatigueHistoryScreen(
+                    onNavigateBack = { navController.popBackStack() }
+                )
+            }
+
+            // AMA-1408: Bulk Import Wizard
+            composable(Screen.BulkImport.route) {
+                BulkImportWizardScreen(
+                    onNavigateBack = { navController.popBackStack() },
+                    onImportComplete = { navController.popBackStack() }
                 )
             }
         }

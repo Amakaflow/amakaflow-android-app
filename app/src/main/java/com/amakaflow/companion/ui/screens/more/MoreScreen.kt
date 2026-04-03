@@ -31,6 +31,9 @@ fun MoreScreen(
     onNavigateToFatigueAdvisor: () -> Unit = {},
     onNavigateToFoodLogging: () -> Unit = {},
     onNavigateToVolumeAnalytics: () -> Unit = {},
+    onNavigateToProgramWizard: () -> Unit = {},
+    onNavigateToFatigueHistory: () -> Unit = {},
+    onNavigateToBulkImport: () -> Unit = {},
 ) {
     Column(
         modifier = Modifier
@@ -121,6 +124,30 @@ fun MoreScreen(
             icon = Icons.Filled.Restaurant,
             title = "Log Food",
             onClick = onNavigateToFoodLogging
+        )
+
+        MoreMenuDivider()
+
+        MoreMenuItem(
+            icon = Icons.Filled.FitnessCenter,
+            title = "Create Program",
+            onClick = onNavigateToProgramWizard
+        )
+
+        MoreMenuDivider()
+
+        MoreMenuItem(
+            icon = Icons.Filled.Timeline,
+            title = "Readiness History",
+            onClick = onNavigateToFatigueHistory
+        )
+
+        MoreMenuDivider()
+
+        MoreMenuItem(
+            icon = Icons.Filled.CloudDownload,
+            title = "Bulk Import",
+            onClick = onNavigateToBulkImport
         )
 
         MoreMenuDivider()
