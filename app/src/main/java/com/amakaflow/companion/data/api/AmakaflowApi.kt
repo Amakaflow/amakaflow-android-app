@@ -300,6 +300,18 @@ interface AmakaflowApi {
     ): Response<DimensionLeaderboardResponse>
 
 
+    // MARK: - Volume Analytics
+
+    /**
+     * Fetch volume analytics for a date range.
+     */
+    @GET("progression/volume")
+    suspend fun fetchVolumeAnalytics(
+        @Query("start_date") startDate: String,
+        @Query("end_date") endDate: String,
+        @Query("granularity") granularity: String
+    ): Response<VolumeAnalyticsResponse>
+
     // MARK: - Nutrition / Fueling (AMA-1293)
 
     /**

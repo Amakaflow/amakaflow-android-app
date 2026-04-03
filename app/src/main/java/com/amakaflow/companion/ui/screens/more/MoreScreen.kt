@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.CompareArrows
 import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.filled.BarChart
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -29,6 +30,7 @@ fun MoreScreen(
     onNavigateToShoeComparison: () -> Unit = {},
     onNavigateToFatigueAdvisor: () -> Unit = {},
     onNavigateToFoodLogging: () -> Unit = {},
+    onNavigateToVolumeAnalytics: () -> Unit = {},
 ) {
     Column(
         modifier = Modifier
@@ -55,6 +57,14 @@ fun MoreScreen(
             icon = Icons.Filled.History,
             title = "History",
             onClick = onNavigateToHistory
+        )
+
+        MoreMenuDivider()
+
+        MoreMenuItem(
+            icon = Icons.Filled.BarChart,
+            title = "Volume Analytics",
+            onClick = onNavigateToVolumeAnalytics
         )
 
         MoreMenuDivider()

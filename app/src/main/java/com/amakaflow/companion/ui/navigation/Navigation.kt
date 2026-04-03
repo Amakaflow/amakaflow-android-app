@@ -68,6 +68,7 @@ import com.amakaflow.companion.ui.screens.preferences.TrainingPreferencesScreen
 import com.amakaflow.companion.ui.screens.shoes.ShoeComparisonScreen
 import com.amakaflow.companion.ui.screens.voice.VoiceWorkoutScreen
 import com.amakaflow.companion.ui.screens.suggest.SuggestWorkoutScreen
+import com.amakaflow.companion.ui.screens.analytics.VolumeAnalyticsScreen
 import com.amakaflow.companion.ui.screens.nutrition.FoodLoggingScreen
 import com.amakaflow.companion.ui.screens.nutrition.NutritionOnboardingScreen
 import com.amakaflow.companion.ui.screens.nutrition.NutritionSettingsScreen
@@ -140,6 +141,8 @@ sealed class Screen(val route: String) {
     data object FoodLogging : Screen("food_logging")
     data object NutritionSettings : Screen("nutrition_settings")
     data object NutritionOnboarding : Screen("nutrition_onboarding")
+    // Volume Analytics
+    data object VolumeAnalytics : Screen("volume_analytics")
 }
 
 /**
@@ -403,6 +406,9 @@ fun MainScreen(testConfig: TestConfig) {
                     },
                     onNavigateToFoodLogging = {
                         navController.navigate(Screen.FoodLogging.route)
+                    },
+                    onNavigateToVolumeAnalytics = {
+                        navController.navigate(Screen.VolumeAnalytics.route)
                     },
                 )
             }
@@ -672,6 +678,13 @@ fun MainScreen(testConfig: TestConfig) {
             // AMA-1294: AI Food Logging
             composable(Screen.FoodLogging.route) {
                 FoodLoggingScreen(
+                    onNavigateBack = { navController.popBackStack() }
+                )
+            }
+
+            // Volume Analytics
+            composable(Screen.VolumeAnalytics.route) {
+                VolumeAnalyticsScreen(
                     onNavigateBack = { navController.popBackStack() }
                 )
             }
