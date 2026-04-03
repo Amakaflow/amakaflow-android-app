@@ -1,0 +1,237 @@
+1<?xml version="1.0" encoding="utf-8"?>
+2<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+3    package="com.amakaflow.wear"
+4    android:versionCode="1"
+5    android:versionName="1.0.0" >
+6
+7    <uses-sdk
+8        android:minSdkVersion="30"
+9        android:targetSdkVersion="34" />
+10
+11    <uses-feature android:name="android.hardware.type.watch" />
+11-->/Volumes/SSD1/openclaw/workspace/amakaflow-android-app/wear/src/main/AndroidManifest.xml:4:5-64
+11-->/Volumes/SSD1/openclaw/workspace/amakaflow-android-app/wear/src/main/AndroidManifest.xml:4:19-61
+12
+13    <uses-permission android:name="android.permission.WAKE_LOCK" />
+13-->/Volumes/SSD1/openclaw/workspace/amakaflow-android-app/wear/src/main/AndroidManifest.xml:6:5-68
+13-->/Volumes/SSD1/openclaw/workspace/amakaflow-android-app/wear/src/main/AndroidManifest.xml:6:22-65
+14    <uses-permission android:name="android.permission.VIBRATE" />
+14-->/Volumes/SSD1/openclaw/workspace/amakaflow-android-app/wear/src/main/AndroidManifest.xml:7:5-66
+14-->/Volumes/SSD1/openclaw/workspace/amakaflow-android-app/wear/src/main/AndroidManifest.xml:7:22-63
+15    <uses-permission android:name="android.permission.BODY_SENSORS" />
+15-->/Volumes/SSD1/openclaw/workspace/amakaflow-android-app/wear/src/main/AndroidManifest.xml:8:5-71
+15-->/Volumes/SSD1/openclaw/workspace/amakaflow-android-app/wear/src/main/AndroidManifest.xml:8:22-68
+16    <uses-permission android:name="android.permission.ACTIVITY_RECOGNITION" />
+16-->/Volumes/SSD1/openclaw/workspace/amakaflow-android-app/wear/src/main/AndroidManifest.xml:9:5-79
+16-->/Volumes/SSD1/openclaw/workspace/amakaflow-android-app/wear/src/main/AndroidManifest.xml:9:22-76
+17
+18    <queries>
+18-->[androidx.health:health-services-client:1.1.0-alpha05] /Users/davidmini/.gradle/caches/8.13/transforms/ec812da325532d4d85fd9d5bd89ce15d/transformed/health-services-client-1.1.0-alpha05/AndroidManifest.xml:19:5-21:15
+19        <package android:name="com.google.android.wearable.healthservices" />
+19-->[androidx.health:health-services-client:1.1.0-alpha05] /Users/davidmini/.gradle/caches/8.13/transforms/ec812da325532d4d85fd9d5bd89ce15d/transformed/health-services-client-1.1.0-alpha05/AndroidManifest.xml:20:9-78
+19-->[androidx.health:health-services-client:1.1.0-alpha05] /Users/davidmini/.gradle/caches/8.13/transforms/ec812da325532d4d85fd9d5bd89ce15d/transformed/health-services-client-1.1.0-alpha05/AndroidManifest.xml:20:18-75
+20    </queries>
+21
+22    <permission
+22-->[androidx.core:core:1.15.0] /Users/davidmini/.gradle/caches/8.13/transforms/76641fc68a9b6c77cefd70971606cff2/transformed/core-1.15.0/AndroidManifest.xml:22:5-24:47
+23        android:name="com.amakaflow.wear.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION"
+23-->[androidx.core:core:1.15.0] /Users/davidmini/.gradle/caches/8.13/transforms/76641fc68a9b6c77cefd70971606cff2/transformed/core-1.15.0/AndroidManifest.xml:23:9-81
+24        android:protectionLevel="signature" />
+24-->[androidx.core:core:1.15.0] /Users/davidmini/.gradle/caches/8.13/transforms/76641fc68a9b6c77cefd70971606cff2/transformed/core-1.15.0/AndroidManifest.xml:24:9-44
+25
+26    <uses-permission android:name="com.amakaflow.wear.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION" />
+26-->[androidx.core:core:1.15.0] /Users/davidmini/.gradle/caches/8.13/transforms/76641fc68a9b6c77cefd70971606cff2/transformed/core-1.15.0/AndroidManifest.xml:26:5-97
+26-->[androidx.core:core:1.15.0] /Users/davidmini/.gradle/caches/8.13/transforms/76641fc68a9b6c77cefd70971606cff2/transformed/core-1.15.0/AndroidManifest.xml:26:22-94
+27
+28    <application
+28-->/Volumes/SSD1/openclaw/workspace/amakaflow-android-app/wear/src/main/AndroidManifest.xml:11:5-51:19
+29        android:name="com.amakaflow.wear.WearApplication"
+29-->/Volumes/SSD1/openclaw/workspace/amakaflow-android-app/wear/src/main/AndroidManifest.xml:12:9-40
+30        android:appComponentFactory="androidx.core.app.CoreComponentFactory"
+30-->[androidx.core:core:1.15.0] /Users/davidmini/.gradle/caches/8.13/transforms/76641fc68a9b6c77cefd70971606cff2/transformed/core-1.15.0/AndroidManifest.xml:28:18-86
+31        android:debuggable="true"
+32        android:extractNativeLibs="false"
+33        android:label="AmakaFlow"
+33-->/Volumes/SSD1/openclaw/workspace/amakaflow-android-app/wear/src/main/AndroidManifest.xml:13:9-34
+34        android:supportsRtl="true"
+34-->/Volumes/SSD1/openclaw/workspace/amakaflow-android-app/wear/src/main/AndroidManifest.xml:14:9-35
+35        android:theme="@android:style/Theme.DeviceDefault" >
+35-->/Volumes/SSD1/openclaw/workspace/amakaflow-android-app/wear/src/main/AndroidManifest.xml:15:9-59
+36        <uses-library
+36-->/Volumes/SSD1/openclaw/workspace/amakaflow-android-app/wear/src/main/AndroidManifest.xml:17:9-19:39
+37            android:name="com.google.android.wearable"
+37-->/Volumes/SSD1/openclaw/workspace/amakaflow-android-app/wear/src/main/AndroidManifest.xml:18:13-55
+38            android:required="true" />
+38-->/Volumes/SSD1/openclaw/workspace/amakaflow-android-app/wear/src/main/AndroidManifest.xml:19:13-36
+39
+40        <activity
+40-->/Volumes/SSD1/openclaw/workspace/amakaflow-android-app/wear/src/main/AndroidManifest.xml:21:9-30:20
+41            android:name="com.amakaflow.wear.presentation.WearMainActivity"
+41-->/Volumes/SSD1/openclaw/workspace/amakaflow-android-app/wear/src/main/AndroidManifest.xml:22:13-58
+42            android:exported="true"
+42-->/Volumes/SSD1/openclaw/workspace/amakaflow-android-app/wear/src/main/AndroidManifest.xml:23:13-36
+43            android:taskAffinity=""
+43-->/Volumes/SSD1/openclaw/workspace/amakaflow-android-app/wear/src/main/AndroidManifest.xml:24:13-36
+44            android:theme="@android:style/Theme.DeviceDefault" >
+44-->/Volumes/SSD1/openclaw/workspace/amakaflow-android-app/wear/src/main/AndroidManifest.xml:25:13-63
+45            <intent-filter>
+45-->/Volumes/SSD1/openclaw/workspace/amakaflow-android-app/wear/src/main/AndroidManifest.xml:26:13-29:29
+46                <action android:name="android.intent.action.MAIN" />
+46-->/Volumes/SSD1/openclaw/workspace/amakaflow-android-app/wear/src/main/AndroidManifest.xml:27:17-69
+46-->/Volumes/SSD1/openclaw/workspace/amakaflow-android-app/wear/src/main/AndroidManifest.xml:27:25-66
+47
+48                <category android:name="android.intent.category.LAUNCHER" />
+48-->/Volumes/SSD1/openclaw/workspace/amakaflow-android-app/wear/src/main/AndroidManifest.xml:28:17-77
+48-->/Volumes/SSD1/openclaw/workspace/amakaflow-android-app/wear/src/main/AndroidManifest.xml:28:27-74
+49            </intent-filter>
+50        </activity>
+51
+52        <!-- DataLayer listener service -->
+53        <service
+53-->/Volumes/SSD1/openclaw/workspace/amakaflow-android-app/wear/src/main/AndroidManifest.xml:33:9-45:19
+54            android:name="com.amakaflow.wear.data.connectivity.WearDataListenerService"
+54-->/Volumes/SSD1/openclaw/workspace/amakaflow-android-app/wear/src/main/AndroidManifest.xml:34:13-70
+55            android:exported="true"
+55-->/Volumes/SSD1/openclaw/workspace/amakaflow-android-app/wear/src/main/AndroidManifest.xml:35:13-36
+56            android:permission="com.google.android.gms.permission.BIND_LISTENER" >
+56-->/Volumes/SSD1/openclaw/workspace/amakaflow-android-app/wear/src/main/AndroidManifest.xml:36:13-81
+57            <intent-filter>
+57-->/Volumes/SSD1/openclaw/workspace/amakaflow-android-app/wear/src/main/AndroidManifest.xml:37:13-44:29
+58                <action android:name="com.google.android.gms.wearable.DATA_CHANGED" />
+58-->/Volumes/SSD1/openclaw/workspace/amakaflow-android-app/wear/src/main/AndroidManifest.xml:38:17-87
+58-->/Volumes/SSD1/openclaw/workspace/amakaflow-android-app/wear/src/main/AndroidManifest.xml:38:25-84
+59                <action android:name="com.google.android.gms.wearable.MESSAGE_RECEIVED" />
+59-->/Volumes/SSD1/openclaw/workspace/amakaflow-android-app/wear/src/main/AndroidManifest.xml:39:17-91
+59-->/Volumes/SSD1/openclaw/workspace/amakaflow-android-app/wear/src/main/AndroidManifest.xml:39:25-88
+60
+61                <data
+61-->/Volumes/SSD1/openclaw/workspace/amakaflow-android-app/wear/src/main/AndroidManifest.xml:40:17-43:45
+62                    android:host="*"
+62-->/Volumes/SSD1/openclaw/workspace/amakaflow-android-app/wear/src/main/AndroidManifest.xml:41:21-37
+63                    android:pathPrefix="/amakaflow"
+63-->/Volumes/SSD1/openclaw/workspace/amakaflow-android-app/wear/src/main/AndroidManifest.xml:42:21-52
+64                    android:scheme="wear" />
+64-->/Volumes/SSD1/openclaw/workspace/amakaflow-android-app/wear/src/main/AndroidManifest.xml:43:21-42
+65            </intent-filter>
+66        </service>
+67
+68        <meta-data
+68-->/Volumes/SSD1/openclaw/workspace/amakaflow-android-app/wear/src/main/AndroidManifest.xml:47:9-49:37
+69            android:name="com.google.android.wearable.standalone"
+69-->/Volumes/SSD1/openclaw/workspace/amakaflow-android-app/wear/src/main/AndroidManifest.xml:48:13-66
+70            android:value="false" />
+70-->/Volumes/SSD1/openclaw/workspace/amakaflow-android-app/wear/src/main/AndroidManifest.xml:49:13-34
+71
+72        <service
+72-->[androidx.health:health-services-client:1.1.0-alpha05] /Users/davidmini/.gradle/caches/8.13/transforms/ec812da325532d4d85fd9d5bd89ce15d/transformed/health-services-client-1.1.0-alpha05/AndroidManifest.xml:24:9-31:19
+73            android:name="androidx.health.services.client.VersionApiService"
+73-->[androidx.health:health-services-client:1.1.0-alpha05] /Users/davidmini/.gradle/caches/8.13/transforms/ec812da325532d4d85fd9d5bd89ce15d/transformed/health-services-client-1.1.0-alpha05/AndroidManifest.xml:25:13-77
+74            android:exported="true"
+74-->[androidx.health:health-services-client:1.1.0-alpha05] /Users/davidmini/.gradle/caches/8.13/transforms/ec812da325532d4d85fd9d5bd89ce15d/transformed/health-services-client-1.1.0-alpha05/AndroidManifest.xml:26:13-36
+75            android:permission="com.google.android.wearable.healthservices.permission.PASSIVE_DATA_BINDING" >
+75-->[androidx.health:health-services-client:1.1.0-alpha05] /Users/davidmini/.gradle/caches/8.13/transforms/ec812da325532d4d85fd9d5bd89ce15d/transformed/health-services-client-1.1.0-alpha05/AndroidManifest.xml:27:13-108
+76            <intent-filter>
+76-->[androidx.health:health-services-client:1.1.0-alpha05] /Users/davidmini/.gradle/caches/8.13/transforms/ec812da325532d4d85fd9d5bd89ce15d/transformed/health-services-client-1.1.0-alpha05/AndroidManifest.xml:28:13-30:29
+77                <action android:name="hs.versionclient.BIND" />
+77-->[androidx.health:health-services-client:1.1.0-alpha05] /Users/davidmini/.gradle/caches/8.13/transforms/ec812da325532d4d85fd9d5bd89ce15d/transformed/health-services-client-1.1.0-alpha05/AndroidManifest.xml:29:17-64
+77-->[androidx.health:health-services-client:1.1.0-alpha05] /Users/davidmini/.gradle/caches/8.13/transforms/ec812da325532d4d85fd9d5bd89ce15d/transformed/health-services-client-1.1.0-alpha05/AndroidManifest.xml:29:25-61
+78            </intent-filter>
+79        </service>
+80
+81        <uses-library
+81-->[androidx.wear.compose:compose-foundation:1.4.0] /Users/davidmini/.gradle/caches/8.13/transforms/eeb1888c319fa80f6f8924885f910715/transformed/compose-foundation-1.4.0/AndroidManifest.xml:23:9-25:40
+82            android:name="wear-sdk"
+82-->[androidx.wear.compose:compose-foundation:1.4.0] /Users/davidmini/.gradle/caches/8.13/transforms/eeb1888c319fa80f6f8924885f910715/transformed/compose-foundation-1.4.0/AndroidManifest.xml:24:13-36
+83            android:required="false" />
+83-->[androidx.wear.compose:compose-foundation:1.4.0] /Users/davidmini/.gradle/caches/8.13/transforms/eeb1888c319fa80f6f8924885f910715/transformed/compose-foundation-1.4.0/AndroidManifest.xml:25:13-37
+84
+85        <activity
+85-->[com.google.android.gms:play-services-base:18.5.0] /Users/davidmini/.gradle/caches/8.13/transforms/70ebec2ec8dd8410433b2eceb7902b75/transformed/play-services-base-18.5.0/AndroidManifest.xml:5:9-173
+86            android:name="com.google.android.gms.common.api.GoogleApiActivity"
+86-->[com.google.android.gms:play-services-base:18.5.0] /Users/davidmini/.gradle/caches/8.13/transforms/70ebec2ec8dd8410433b2eceb7902b75/transformed/play-services-base-18.5.0/AndroidManifest.xml:5:19-85
+87            android:exported="false"
+87-->[com.google.android.gms:play-services-base:18.5.0] /Users/davidmini/.gradle/caches/8.13/transforms/70ebec2ec8dd8410433b2eceb7902b75/transformed/play-services-base-18.5.0/AndroidManifest.xml:5:146-170
+88            android:theme="@android:style/Theme.Translucent.NoTitleBar" />
+88-->[com.google.android.gms:play-services-base:18.5.0] /Users/davidmini/.gradle/caches/8.13/transforms/70ebec2ec8dd8410433b2eceb7902b75/transformed/play-services-base-18.5.0/AndroidManifest.xml:5:86-145
+89        <activity
+89-->[androidx.compose.ui:ui-tooling-android:1.7.6] /Users/davidmini/.gradle/caches/8.13/transforms/9ad9525791a1b292243c53c4765d8f26/transformed/ui-tooling-release/AndroidManifest.xml:23:9-25:39
+90            android:name="androidx.compose.ui.tooling.PreviewActivity"
+90-->[androidx.compose.ui:ui-tooling-android:1.7.6] /Users/davidmini/.gradle/caches/8.13/transforms/9ad9525791a1b292243c53c4765d8f26/transformed/ui-tooling-release/AndroidManifest.xml:24:13-71
+91            android:exported="true" />
+91-->[androidx.compose.ui:ui-tooling-android:1.7.6] /Users/davidmini/.gradle/caches/8.13/transforms/9ad9525791a1b292243c53c4765d8f26/transformed/ui-tooling-release/AndroidManifest.xml:25:13-36
+92
+93        <provider
+93-->[androidx.emoji2:emoji2:1.3.0] /Users/davidmini/.gradle/caches/8.13/transforms/396dd68dacf3b1e53fb92e0d9556160c/transformed/emoji2-1.3.0/AndroidManifest.xml:24:9-32:20
+94            android:name="androidx.startup.InitializationProvider"
+94-->[androidx.emoji2:emoji2:1.3.0] /Users/davidmini/.gradle/caches/8.13/transforms/396dd68dacf3b1e53fb92e0d9556160c/transformed/emoji2-1.3.0/AndroidManifest.xml:25:13-67
+95            android:authorities="com.amakaflow.wear.androidx-startup"
+95-->[androidx.emoji2:emoji2:1.3.0] /Users/davidmini/.gradle/caches/8.13/transforms/396dd68dacf3b1e53fb92e0d9556160c/transformed/emoji2-1.3.0/AndroidManifest.xml:26:13-68
+96            android:exported="false" >
+96-->[androidx.emoji2:emoji2:1.3.0] /Users/davidmini/.gradle/caches/8.13/transforms/396dd68dacf3b1e53fb92e0d9556160c/transformed/emoji2-1.3.0/AndroidManifest.xml:27:13-37
+97            <meta-data
+97-->[androidx.emoji2:emoji2:1.3.0] /Users/davidmini/.gradle/caches/8.13/transforms/396dd68dacf3b1e53fb92e0d9556160c/transformed/emoji2-1.3.0/AndroidManifest.xml:29:13-31:52
+98                android:name="androidx.emoji2.text.EmojiCompatInitializer"
+98-->[androidx.emoji2:emoji2:1.3.0] /Users/davidmini/.gradle/caches/8.13/transforms/396dd68dacf3b1e53fb92e0d9556160c/transformed/emoji2-1.3.0/AndroidManifest.xml:30:17-75
+99                android:value="androidx.startup" />
+99-->[androidx.emoji2:emoji2:1.3.0] /Users/davidmini/.gradle/caches/8.13/transforms/396dd68dacf3b1e53fb92e0d9556160c/transformed/emoji2-1.3.0/AndroidManifest.xml:31:17-49
+100            <meta-data
+100-->[androidx.lifecycle:lifecycle-process:2.8.7] /Users/davidmini/.gradle/caches/8.13/transforms/60879a55dc9144f5e76c33414c0ab449/transformed/lifecycle-process-2.8.7/AndroidManifest.xml:29:13-31:52
+101                android:name="androidx.lifecycle.ProcessLifecycleInitializer"
+101-->[androidx.lifecycle:lifecycle-process:2.8.7] /Users/davidmini/.gradle/caches/8.13/transforms/60879a55dc9144f5e76c33414c0ab449/transformed/lifecycle-process-2.8.7/AndroidManifest.xml:30:17-78
+102                android:value="androidx.startup" />
+102-->[androidx.lifecycle:lifecycle-process:2.8.7] /Users/davidmini/.gradle/caches/8.13/transforms/60879a55dc9144f5e76c33414c0ab449/transformed/lifecycle-process-2.8.7/AndroidManifest.xml:31:17-49
+103            <meta-data
+103-->[androidx.profileinstaller:profileinstaller:1.3.1] /Users/davidmini/.gradle/caches/8.13/transforms/70938a59d23c850c8ed7db3124d9c7c7/transformed/profileinstaller-1.3.1/AndroidManifest.xml:29:13-31:52
+104                android:name="androidx.profileinstaller.ProfileInstallerInitializer"
+104-->[androidx.profileinstaller:profileinstaller:1.3.1] /Users/davidmini/.gradle/caches/8.13/transforms/70938a59d23c850c8ed7db3124d9c7c7/transformed/profileinstaller-1.3.1/AndroidManifest.xml:30:17-85
+105                android:value="androidx.startup" />
+105-->[androidx.profileinstaller:profileinstaller:1.3.1] /Users/davidmini/.gradle/caches/8.13/transforms/70938a59d23c850c8ed7db3124d9c7c7/transformed/profileinstaller-1.3.1/AndroidManifest.xml:31:17-49
+106        </provider>
+107
+108        <meta-data
+108-->[com.google.android.gms:play-services-basement:18.4.0] /Users/davidmini/.gradle/caches/8.13/transforms/3ac0a92d1ffc28b49dbf2f26cc4b1091/transformed/play-services-basement-18.4.0/AndroidManifest.xml:6:9-122
+109            android:name="com.google.android.gms.version"
+109-->[com.google.android.gms:play-services-basement:18.4.0] /Users/davidmini/.gradle/caches/8.13/transforms/3ac0a92d1ffc28b49dbf2f26cc4b1091/transformed/play-services-basement-18.4.0/AndroidManifest.xml:6:20-65
+110            android:value="@integer/google_play_services_version" />
+110-->[com.google.android.gms:play-services-basement:18.4.0] /Users/davidmini/.gradle/caches/8.13/transforms/3ac0a92d1ffc28b49dbf2f26cc4b1091/transformed/play-services-basement-18.4.0/AndroidManifest.xml:6:66-119
+111
+112        <receiver
+112-->[androidx.profileinstaller:profileinstaller:1.3.1] /Users/davidmini/.gradle/caches/8.13/transforms/70938a59d23c850c8ed7db3124d9c7c7/transformed/profileinstaller-1.3.1/AndroidManifest.xml:34:9-52:20
+113            android:name="androidx.profileinstaller.ProfileInstallReceiver"
+113-->[androidx.profileinstaller:profileinstaller:1.3.1] /Users/davidmini/.gradle/caches/8.13/transforms/70938a59d23c850c8ed7db3124d9c7c7/transformed/profileinstaller-1.3.1/AndroidManifest.xml:35:13-76
+114            android:directBootAware="false"
+114-->[androidx.profileinstaller:profileinstaller:1.3.1] /Users/davidmini/.gradle/caches/8.13/transforms/70938a59d23c850c8ed7db3124d9c7c7/transformed/profileinstaller-1.3.1/AndroidManifest.xml:36:13-44
+115            android:enabled="true"
+115-->[androidx.profileinstaller:profileinstaller:1.3.1] /Users/davidmini/.gradle/caches/8.13/transforms/70938a59d23c850c8ed7db3124d9c7c7/transformed/profileinstaller-1.3.1/AndroidManifest.xml:37:13-35
+116            android:exported="true"
+116-->[androidx.profileinstaller:profileinstaller:1.3.1] /Users/davidmini/.gradle/caches/8.13/transforms/70938a59d23c850c8ed7db3124d9c7c7/transformed/profileinstaller-1.3.1/AndroidManifest.xml:38:13-36
+117            android:permission="android.permission.DUMP" >
+117-->[androidx.profileinstaller:profileinstaller:1.3.1] /Users/davidmini/.gradle/caches/8.13/transforms/70938a59d23c850c8ed7db3124d9c7c7/transformed/profileinstaller-1.3.1/AndroidManifest.xml:39:13-57
+118            <intent-filter>
+118-->[androidx.profileinstaller:profileinstaller:1.3.1] /Users/davidmini/.gradle/caches/8.13/transforms/70938a59d23c850c8ed7db3124d9c7c7/transformed/profileinstaller-1.3.1/AndroidManifest.xml:40:13-42:29
+119                <action android:name="androidx.profileinstaller.action.INSTALL_PROFILE" />
+119-->[androidx.profileinstaller:profileinstaller:1.3.1] /Users/davidmini/.gradle/caches/8.13/transforms/70938a59d23c850c8ed7db3124d9c7c7/transformed/profileinstaller-1.3.1/AndroidManifest.xml:41:17-91
+119-->[androidx.profileinstaller:profileinstaller:1.3.1] /Users/davidmini/.gradle/caches/8.13/transforms/70938a59d23c850c8ed7db3124d9c7c7/transformed/profileinstaller-1.3.1/AndroidManifest.xml:41:25-88
+120            </intent-filter>
+121            <intent-filter>
+121-->[androidx.profileinstaller:profileinstaller:1.3.1] /Users/davidmini/.gradle/caches/8.13/transforms/70938a59d23c850c8ed7db3124d9c7c7/transformed/profileinstaller-1.3.1/AndroidManifest.xml:43:13-45:29
+122                <action android:name="androidx.profileinstaller.action.SKIP_FILE" />
+122-->[androidx.profileinstaller:profileinstaller:1.3.1] /Users/davidmini/.gradle/caches/8.13/transforms/70938a59d23c850c8ed7db3124d9c7c7/transformed/profileinstaller-1.3.1/AndroidManifest.xml:44:17-85
+122-->[androidx.profileinstaller:profileinstaller:1.3.1] /Users/davidmini/.gradle/caches/8.13/transforms/70938a59d23c850c8ed7db3124d9c7c7/transformed/profileinstaller-1.3.1/AndroidManifest.xml:44:25-82
+123            </intent-filter>
+124            <intent-filter>
+124-->[androidx.profileinstaller:profileinstaller:1.3.1] /Users/davidmini/.gradle/caches/8.13/transforms/70938a59d23c850c8ed7db3124d9c7c7/transformed/profileinstaller-1.3.1/AndroidManifest.xml:46:13-48:29
+125                <action android:name="androidx.profileinstaller.action.SAVE_PROFILE" />
+125-->[androidx.profileinstaller:profileinstaller:1.3.1] /Users/davidmini/.gradle/caches/8.13/transforms/70938a59d23c850c8ed7db3124d9c7c7/transformed/profileinstaller-1.3.1/AndroidManifest.xml:47:17-88
+125-->[androidx.profileinstaller:profileinstaller:1.3.1] /Users/davidmini/.gradle/caches/8.13/transforms/70938a59d23c850c8ed7db3124d9c7c7/transformed/profileinstaller-1.3.1/AndroidManifest.xml:47:25-85
+126            </intent-filter>
+127            <intent-filter>
+127-->[androidx.profileinstaller:profileinstaller:1.3.1] /Users/davidmini/.gradle/caches/8.13/transforms/70938a59d23c850c8ed7db3124d9c7c7/transformed/profileinstaller-1.3.1/AndroidManifest.xml:49:13-51:29
+128                <action android:name="androidx.profileinstaller.action.BENCHMARK_OPERATION" />
+128-->[androidx.profileinstaller:profileinstaller:1.3.1] /Users/davidmini/.gradle/caches/8.13/transforms/70938a59d23c850c8ed7db3124d9c7c7/transformed/profileinstaller-1.3.1/AndroidManifest.xml:50:17-95
+128-->[androidx.profileinstaller:profileinstaller:1.3.1] /Users/davidmini/.gradle/caches/8.13/transforms/70938a59d23c850c8ed7db3124d9c7c7/transformed/profileinstaller-1.3.1/AndroidManifest.xml:50:25-92
+129            </intent-filter>
+130        </receiver>
+131    </application>
+132
+133</manifest>

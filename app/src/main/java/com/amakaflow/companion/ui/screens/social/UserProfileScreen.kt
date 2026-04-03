@@ -32,10 +32,13 @@ fun UserProfileScreen(
 ) {
     var profile by remember { mutableStateOf<UserPublicProfile?>(null) }
     var isLoading by remember { mutableStateOf(true) }
+    var isFollowLoading by remember { mutableStateOf(false) }
     var error by remember { mutableStateOf<String?>(null) }
     val scope = rememberCoroutineScope()
 
-    LaunchedEffect(userId) {
+    suspend fun fetchProfile() {
+        isLoading = true
+        error = null
         api?.let {
             try {
                 val response = it.getUserPublicProfile(userId)
@@ -49,6 +52,10 @@ fun UserProfileScreen(
             }
             isLoading = false
         } ?: run { isLoading = false; error = "API not available" }
+    }
+
+    LaunchedEffect(userId) {
+        fetchProfile()
     }
 
     Column(
@@ -127,7 +134,28 @@ fun UserProfileScreen(
                             Spacer(Modifier.height(AmakaSpacing.sm.dp))
 
                             Button(
-                                onClick = { /* TODO: follow/unfollow */ },
+                                onClick = {
+                                    if (isFollowLoading || api == null) return@Button
+                                    scope.launch {
+                                        isFollowLoading = true
+                                        try {
+                                            val response = if (p.isFollowing) {
+                                                api.unfollowUser(userId)
+                                            } else {
+                                                api.followUser(userId)
+                                            }
+                                            if (response.isSuccessful) {
+                                                fetchProfile()
+                                            } else {
+                                                error = "Action failed (${response.code()})"
+                                            }
+                                        } catch (e: Exception) {
+                                            error = e.message
+                                        }
+                                        isFollowLoading = false
+                                    }
+                                },
+                                enabled = !isFollowLoading,
                                 colors = ButtonDefaults.buttonColors(
                                     containerColor = if (p.isFollowing) AmakaColors.surfaceElevated else AmakaColors.accentBlue
                                 ),
@@ -136,10 +164,18 @@ fun UserProfileScreen(
                                     .width(120.dp)
                                     .testTag("follow_button")
                             ) {
-                                Text(
-                                    if (p.isFollowing) "Following" else "Follow",
-                                    color = if (p.isFollowing) AmakaColors.textPrimary else AmakaColors.textPrimary
-                                )
+                                if (isFollowLoading) {
+                                    CircularProgressIndicator(
+                                        modifier = Modifier.size(16.dp),
+                                        color = AmakaColors.textPrimary,
+                                        strokeWidth = 2.dp
+                                    )
+                                } else {
+                                    Text(
+                                        if (p.isFollowing) "Following" else "Follow",
+                                        color = AmakaColors.textPrimary
+                                    )
+                                }
                             }
                         }
                     }

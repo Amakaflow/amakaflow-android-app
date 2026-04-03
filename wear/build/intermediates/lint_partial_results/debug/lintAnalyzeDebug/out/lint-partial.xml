@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<incidents format="6" by="lint 8.13.2" type="partial_results">
+    <map id="UnsafeIntentLaunch">
+            <map id="unprotected">
+                <entry
+                    name="com.amakaflow.wear.presentation.WearMainActivity"
+                    boolean="true"/>
+            </map>
+    </map>
+    <map id="UnusedResources">
+        <location id="R.array.android_wear_capabilities"
+            file="${:wear*debug*MAIN*sourceProvider*0*resDir*0}/values/wear.xml"
+            line="3"
+            column="19"
+            startOffset="69"
+            endLine="3"
+            endColumn="51"
+            endOffset="101"/>
+        <entry
+            name="model"
+            string="array[android_wear_capabilities(D)];;;;"/>
+    </map>
+
+</incidents>

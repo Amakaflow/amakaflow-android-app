@@ -68,11 +68,15 @@ import com.amakaflow.companion.ui.screens.preferences.TrainingPreferencesScreen
 import com.amakaflow.companion.ui.screens.shoes.ShoeComparisonScreen
 import com.amakaflow.companion.ui.screens.voice.VoiceWorkoutScreen
 import com.amakaflow.companion.ui.screens.suggest.SuggestWorkoutScreen
+import com.amakaflow.companion.ui.screens.analytics.VolumeAnalyticsScreen
 import com.amakaflow.companion.ui.screens.nutrition.FoodLoggingScreen
 import com.amakaflow.companion.ui.screens.nutrition.NutritionOnboardingScreen
 import com.amakaflow.companion.ui.screens.nutrition.NutritionSettingsScreen
 import com.amakaflow.companion.ui.screens.workouts.WorkoutDetailScreen
 import com.amakaflow.companion.ui.screens.workouts.WorkoutsScreen
+import com.amakaflow.companion.ui.screens.programs.ProgramWizardScreen
+import com.amakaflow.companion.ui.screens.fatigue.FatigueHistoryScreen
+import com.amakaflow.companion.ui.screens.bulkimport.BulkImportWizardScreen
 import com.amakaflow.companion.ui.theme.AmakaColors
 
 /**
@@ -140,6 +144,12 @@ sealed class Screen(val route: String) {
     data object FoodLogging : Screen("food_logging")
     data object NutritionSettings : Screen("nutrition_settings")
     data object NutritionOnboarding : Screen("nutrition_onboarding")
+    // Volume Analytics
+    data object VolumeAnalytics : Screen("volume_analytics")
+    // AMA-1408: native parity batch 1
+    data object ProgramWizard : Screen("program_wizard")
+    data object FatigueHistory : Screen("fatigue_history")
+    data object BulkImport : Screen("bulk_import")
 }
 
 /**
@@ -234,10 +244,10 @@ fun AmakaFlowBottomNavBar(
                     if (!selected) {
                         navController.navigate(item.route) {
                             popUpTo(navController.graph.findStartDestination().id) {
-                                saveState = false
+                                saveState = true
                             }
                             launchSingleTop = true
-                            restoreState = false
+                            restoreState = true
                         }
                     }
                 },
@@ -267,8 +277,13 @@ fun MainScreen(testConfig: TestConfig) {
     val effectivelyPaired = settingsState.isPaired ||
         (testConfig.isTestModeEnabled && testConfig.skipOnboarding)
 
-    // Show bottom bar only when paired and not on pairing screen
-    val showBottomBar = effectivelyPaired && currentRoute != Screen.Pairing.route
+    // Show bottom bar only when paired and not on pairing screen or wizard flows
+    val hideBottomBarRoutes = setOf(
+        Screen.Pairing.route,
+        Screen.ProgramWizard.route,
+        Screen.BulkImport.route,
+    )
+    val showBottomBar = effectivelyPaired && currentRoute !in hideBottomBarRoutes
 
     // Start destination based on pairing state (test mode can bypass pairing)
     val startDestination = if (effectivelyPaired) Screen.Home.route else Screen.Pairing.route
@@ -403,6 +418,18 @@ fun MainScreen(testConfig: TestConfig) {
                     },
                     onNavigateToFoodLogging = {
                         navController.navigate(Screen.FoodLogging.route)
+                    },
+                    onNavigateToVolumeAnalytics = {
+                        navController.navigate(Screen.VolumeAnalytics.route)
+                    },
+                    onNavigateToProgramWizard = {
+                        navController.navigate(Screen.ProgramWizard.route)
+                    },
+                    onNavigateToFatigueHistory = {
+                        navController.navigate(Screen.FatigueHistory.route)
+                    },
+                    onNavigateToBulkImport = {
+                        navController.navigate(Screen.BulkImport.route)
                     },
                 )
             }
@@ -570,6 +597,7 @@ fun MainScreen(testConfig: TestConfig) {
                 CreateChallengeScreen(
                     onNavigateBack = { navController.popBackStack() }
                 )
+            }
 
             // AMA-1277: Crews screens
             composable(Screen.Crews.route) {
@@ -627,7 +655,6 @@ fun MainScreen(testConfig: TestConfig) {
                     onNavigateBack = { navController.popBackStack() }
                 )
             }
-            }
 
             composable(Screen.TrainingPreferences.route) {
                 TrainingPreferencesScreen(
@@ -673,6 +700,36 @@ fun MainScreen(testConfig: TestConfig) {
             composable(Screen.FoodLogging.route) {
                 FoodLoggingScreen(
                     onNavigateBack = { navController.popBackStack() }
+                )
+            }
+
+            // Volume Analytics
+            composable(Screen.VolumeAnalytics.route) {
+                VolumeAnalyticsScreen(
+                    onNavigateBack = { navController.popBackStack() }
+                )
+            }
+
+            // AMA-1408: Program Wizard
+            composable(Screen.ProgramWizard.route) {
+                ProgramWizardScreen(
+                    onNavigateBack = { navController.popBackStack() },
+                    onProgramCreated = { _ -> navController.popBackStack() }
+                )
+            }
+
+            // AMA-1408: Fatigue History
+            composable(Screen.FatigueHistory.route) {
+                FatigueHistoryScreen(
+                    onNavigateBack = { navController.popBackStack() }
+                )
+            }
+
+            // AMA-1408: Bulk Import Wizard
+            composable(Screen.BulkImport.route) {
+                BulkImportWizardScreen(
+                    onNavigateBack = { navController.popBackStack() },
+                    onImportComplete = { navController.popBackStack() }
                 )
             }
         }

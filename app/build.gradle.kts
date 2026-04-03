@@ -185,6 +185,8 @@ dependencies {
     testImplementation("org.mockito.kotlin:mockito-kotlin:5.2.1")
     testImplementation(libs.truth)
     testImplementation(libs.okhttp.mockwebserver)
+    // Provides a real org.json implementation for JVM unit tests (Android stubs return nulls)
+    testImplementation("org.json:json:20240303")
 
     // Testing - Instrumented
     androidTestImplementation(libs.androidx.junit)

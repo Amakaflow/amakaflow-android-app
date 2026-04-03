@@ -1,0 +1,18 @@
+<lint-module
+    format="1"
+    dir="/Volumes/SSD1/openclaw/workspace/amakaflow-android-app/wear"
+    name=":wear"
+    type="APP"
+    maven="AmakaFlow:wear:unspecified"
+    agpVersion="8.13.2"
+    buildFolder="build"
+    bootClassPath="/Users/davidmini/Library/Android/sdk/platforms/android-35/android.jar:/Users/davidmini/Library/Android/sdk/build-tools/35.0.0/core-lambda-stubs.jar"
+    javaSourceLevel="17"
+    compileTarget="android-35">
+  <lintOptions
+      abortOnError="true"
+      absolutePaths="true"
+      checkReleaseBuilds="true"
+      explainIssues="true"/>
+  <variant name="debug"/>
+</lint-module>

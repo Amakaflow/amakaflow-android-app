@@ -2,6 +2,9 @@ package com.amakaflow.companion.data.api
 
 import com.amakaflow.companion.data.model.*
 import com.amakaflow.companion.data.nutrition.BarcodeProductResponse
+import com.amakaflow.companion.data.model.ProgramGenerationRequest
+import com.amakaflow.companion.data.model.ProgramGenerationResponse
+import com.amakaflow.companion.data.model.ProgramGenerationStatus
 import com.amakaflow.companion.data.nutrition.FuelingStatusResponse
 import com.amakaflow.companion.data.nutrition.ParseTextRequest
 import com.amakaflow.companion.data.nutrition.ParseTextResponse
@@ -227,6 +230,12 @@ interface AmakaflowApi {
         @Path("userId") userId: String
     ): Response<UserPublicProfile>
 
+    @POST("social/users/{userId}/follow")
+    suspend fun followUser(@Path("userId") userId: String): Response<Unit>
+
+    @POST("social/users/{userId}/unfollow")
+    suspend fun unfollowUser(@Path("userId") userId: String): Response<Unit>
+
     // MARK: - Training Crews (AMA-1277)
 
     @GET("social/crews")
@@ -294,6 +303,18 @@ interface AmakaflowApi {
     ): Response<DimensionLeaderboardResponse>
 
 
+    // MARK: - Volume Analytics
+
+    /**
+     * Fetch volume analytics for a date range.
+     */
+    @GET("progression/volume")
+    suspend fun fetchVolumeAnalytics(
+        @Query("start_date") startDate: String,
+        @Query("end_date") endDate: String,
+        @Query("granularity") granularity: String
+    ): Response<VolumeAnalyticsResponse>
+
     // MARK: - Nutrition / Fueling (AMA-1293)
 
     /**
@@ -328,6 +349,23 @@ interface AmakaflowApi {
      */
     @POST("nutrition/parse-text")
     suspend fun parseNutritionText(@Body request: ParseTextRequest): Response<ParseTextResponse>
+
+    // MARK: - Program Generation (AMA-1408)
+
+    @POST("programs/generate")
+    suspend fun generateProgram(@Body request: ProgramGenerationRequest): Response<ProgramGenerationResponse>
+
+    @GET("programs/generate/{jobId}/status")
+    suspend fun fetchGenerationStatus(@Path("jobId") jobId: String): Response<ProgramGenerationStatus>
+
+    @PATCH("training-programs/{id}/status")
+    suspend fun updateProgramStatus(@Path("id") id: String, @Body body: Map<String, String>): Response<Unit>
+
+    @DELETE("training-programs/{id}")
+    suspend fun deleteProgram(@Path("id") id: String): Response<Unit>
+
+    @PATCH("training-programs/workouts/{workoutId}/complete")
+    suspend fun completeProgramWorkout(@Path("workoutId") workoutId: String): Response<Unit>
 }
 
 
@@ -360,4 +398,24 @@ interface IngestorApi {
      */
     @POST("ingest/url")
     suspend fun importUrl(@Body request: UrlImportRequest): Response<WorkoutResponse>
+
+    // MARK: - Bulk Import (AMA-1408)
+
+    @POST("import/detect")
+    suspend fun detectImport(@Body request: BulkDetectRequest): Response<BulkDetectResponse>
+
+    @POST("import/match")
+    suspend fun matchExercises(@Body request: BulkMatchRequest): Response<BulkMatchResponse>
+
+    @POST("import/preview")
+    suspend fun previewImport(@Body request: BulkPreviewRequest): Response<BulkPreviewResponse>
+
+    @POST("import/execute")
+    suspend fun executeImport(@Body request: BulkExecuteRequest): Response<BulkExecuteResponse>
+
+    @GET("import/status/{jobId}")
+    suspend fun fetchImportStatus(
+        @Path("jobId") jobId: String,
+        @Query("profile_id") profileId: String? = null
+    ): Response<BulkImportStatus>
 }
