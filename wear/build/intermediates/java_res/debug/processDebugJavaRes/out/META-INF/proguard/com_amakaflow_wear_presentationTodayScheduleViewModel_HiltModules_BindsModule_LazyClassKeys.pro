@@ -1,0 +1,3 @@
+-keep,allowobfuscation,allowshrinking class com.amakaflow.wear.presentation.ReadinessViewModel
+-keep,allowobfuscation,allowshrinking class com.amakaflow.wear.presentation.ReadinessViewModel
+-keep,allowobfuscation,allowshrinking class com.amakaflow.wear.presentation.TodayScheduleViewModel

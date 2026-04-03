@@ -1,0 +1,14 @@
+-- Merging decision tree log ---
+manifest
+ADDED from /Volumes/SSD1/openclaw/workspace/amakaflow-android-app/shared/src/main/AndroidManifest.xml:2:1-13
+INJECTED from /Volumes/SSD1/openclaw/workspace/amakaflow-android-app/shared/src/main/AndroidManifest.xml:2:1-13
+	package
+		INJECTED from /Volumes/SSD1/openclaw/workspace/amakaflow-android-app/shared/src/main/AndroidManifest.xml
+uses-sdk
+INJECTED from /Volumes/SSD1/openclaw/workspace/amakaflow-android-app/shared/src/main/AndroidManifest.xml reason: use-sdk injection requested
+INJECTED from /Volumes/SSD1/openclaw/workspace/amakaflow-android-app/shared/src/main/AndroidManifest.xml
+INJECTED from /Volumes/SSD1/openclaw/workspace/amakaflow-android-app/shared/src/main/AndroidManifest.xml
+	android:targetSdkVersion
+		INJECTED from /Volumes/SSD1/openclaw/workspace/amakaflow-android-app/shared/src/main/AndroidManifest.xml
+	android:minSdkVersion
+		INJECTED from /Volumes/SSD1/openclaw/workspace/amakaflow-android-app/shared/src/main/AndroidManifest.xml

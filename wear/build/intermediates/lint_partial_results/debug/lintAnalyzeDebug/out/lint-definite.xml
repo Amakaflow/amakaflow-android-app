@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<incidents format="6" by="lint 8.13.2" type="incidents">
+
+    <incident
+        id="DefaultLocale"
+        severity="warning"
+        message="Implicitly using the default locale is a common source of bugs: Use `String.format(Locale, ...)` instead">
+        <location
+            file="${:wear*debug*MAIN*sourceProvider*0*javaDir*0}/com/amakaflow/wear/presentation/WorkoutExecutionViewModel.kt"
+            line="70"
+            column="20"
+            startOffset="2159"
+            endLine="70"
+            endColumn="62"
+            endOffset="2201"/>
+    </incident>
+
+    <incident
+        id="DefaultLocale"
+        severity="warning"
+        message="Implicitly using the default locale is a common source of bugs: Use `String.format(Locale, ...)` instead">
+        <location
+            file="${:wear*debug*MAIN*sourceProvider*0*javaDir*0}/com/amakaflow/wear/presentation/WorkoutExecutionViewModel.kt"
+            line="77"
+            column="20"
+            startOffset="2379"
+            endLine="77"
+            endColumn="62"
+            endOffset="2421"/>
+    </incident>
+
+    <incident
+        id="GradleDependency"
+        severity="warning"
+        message="A newer version of `compileSdkVersion` than 35 is available: 36">
+        <fix-replace
+            description="Set compileSdkVersion to 36"
+            oldString="35"
+            replacement="36"
+            priority="0"/>
+        <location
+            file="${:wear*projectDir}/build.gradle.kts"
+            line="12"
+            column="5"
+            startOffset="288"
+            endLine="12"
+            endColumn="20"
+            endOffset="303"/>
+    </incident>
+
+    <incident
+        id="NewerVersionAvailable"
+        severity="warning"
+        message="A newer version of com.google.guava:guava than 32.1.3-android is available: 33.5.0-android">
+        <fix-replace
+            description="Change to 33.5.0-android"
+            family="Update versions"
+            oldString="32.1.3-android"
+            replacement="33.5.0-android"
+            priority="0"/>
+        <location
+            file="${:wear*projectDir}/build.gradle.kts"
+            line="83"
+            column="20"
+            startOffset="2200"
+            endLine="83"
+            endColumn="59"
+            endOffset="2239"/>
+    </incident>
+
+    <incident
+        id="UseTomlInstead"
+        severity="warning"
+        message="Use version catalog instead">
+        <fix-composite
+            description="Replace with new library catalog declaration for guava"
+            robot="true">
+            <fix-replace
+                description="Replace with guava = &quot;32.1.3-android&quot;..."
+                robot="true"
+                oldString="_lint_insert_begin_"
+                replacement="guava = &quot;32.1.3-android&quot;&#xA;"
+                priority="0">
+                <range
+                    file="../gradle/libs.versions.toml"
+                    startOffset="26"
+                    endOffset="26"/>
+            </fix-replace>
+            <fix-replace
+                description="Replace with guava = { module = &quot;com.google.guava:guava&quot;, version.ref = &quot;guava&quot; }..."
+                robot="true"
+                oldString="_lint_insert_begin_"
+                replacement="guava = { module = &quot;com.google.guava:guava&quot;, version.ref = &quot;guava&quot; }&#xA;"
+                priority="0">
+                <range
+                    file="../gradle/libs.versions.toml"
+                    startOffset="2624"
+                    endOffset="2624"/>
+            </fix-replace>
+            <fix-replace
+                description="Replace with libs.guava"
+                robot="true"
+                replacement="libs.guava"
+                priority="0">
+                <range
+                    file="${:wear*projectDir}/build.gradle.kts"
+                    startOffset="2200"
+                    endOffset="2239"/>
+            </fix-replace>
+        </fix-composite>
+        <location
+            file="${:wear*projectDir}/build.gradle.kts"
+            line="83"
+            column="20"
+            startOffset="2200"
+            endLine="83"
+            endColumn="59"
+            endOffset="2239"/>
+    </incident>
+
+</incidents>

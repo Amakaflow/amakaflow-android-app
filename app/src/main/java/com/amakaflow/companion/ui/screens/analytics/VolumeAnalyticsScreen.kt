@@ -720,15 +720,15 @@ private fun EmptyCard() {
 
 private fun formatVolume(kg: Double): String {
     return when {
-        kg >= 1_000_000 -> "${"%.1f".format(kg / 1_000_000)}M kg"
-        kg >= 1_000 -> "${"%.1f".format(kg / 1_000)}k kg"
-        else -> "${"%.0f".format(kg)} kg"
+        kg >= 1_000_000 -> "${String.format(java.util.Locale.US, "%.1f", kg / 1_000_000)}M kg"
+        kg >= 1_000 -> "${String.format(java.util.Locale.US, "%.1f", kg / 1_000)}k kg"
+        else -> "${String.format(java.util.Locale.US, "%.0f", kg)} kg"
     }
 }
 
 private fun formatChangePct(pct: Double): String {
     val sign = if (pct >= 0) "+" else ""
-    return "$sign${"%.1f".format(pct)}%"
+    return "$sign${String.format(java.util.Locale.US, "%.1f", pct)}%"
 }
 
 private fun formatPeriodLabel(period: String): String {

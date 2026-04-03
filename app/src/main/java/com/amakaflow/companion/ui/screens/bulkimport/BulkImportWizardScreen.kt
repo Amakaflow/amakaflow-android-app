@@ -131,7 +131,7 @@ fun BulkImportWizardScreen(
                 BulkImportStep.DETECTION -> DetectionStep(state, viewModel)
                 BulkImportStep.EXERCISE_MATCHING -> ExerciseMatchingStep(state, viewModel)
                 BulkImportStep.PREVIEW -> PreviewStep(state, viewModel)
-                BulkImportStep.IMPORT -> ImportProgressStep(state, onImportComplete)
+                BulkImportStep.IMPORT -> ImportProgressStep(state, onImportComplete, viewModel)
             }
         }
     }
@@ -693,7 +693,7 @@ private fun PreviewWorkoutCard(workout: PreviewWorkout, selected: Boolean, onTog
 // =====================================================================
 
 @Composable
-private fun ImportProgressStep(state: BulkImportState, onImportComplete: () -> Unit = {}) {
+private fun ImportProgressStep(state: BulkImportState, onImportComplete: () -> Unit = {}, viewModel: BulkImportViewModel = hiltViewModel()) {
     val importStatus = state.importStatus
 
     Column(
@@ -788,6 +788,19 @@ private fun ImportProgressStep(state: BulkImportState, onImportComplete: () -> U
                     color = AmakaColors.textSecondary,
                     textAlign = TextAlign.Center
                 )
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = AmakaSpacing.md.dp),
+                    horizontalArrangement = Arrangement.spacedBy(AmakaSpacing.sm.dp)
+                ) {
+                    TextButton(onClick = onImportComplete, modifier = Modifier.weight(1f)) {
+                        Text("Dismiss", color = AmakaColors.textSecondary)
+                    }
+                    Button(onClick = { viewModel.goBack() }, modifier = Modifier.weight(1f)) {
+                        Text("Retry")
+                    }
+                }
             }
         }
     }

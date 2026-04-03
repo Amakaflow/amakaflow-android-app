@@ -46,6 +46,7 @@ class FatigueHistoryViewModel @Inject constructor(
         private set
 
     private var loadJob: Job? = null
+    private var loadRequestId = 0L
 
     // Computed stats
     val averageScore: Double
@@ -72,6 +73,7 @@ class FatigueHistoryViewModel @Inject constructor(
 
     fun loadHistory() {
         loadJob?.cancel()
+        val requestId = ++loadRequestId
         loadJob = viewModelScope.launch {
             isLoading = true
             error = null
@@ -85,6 +87,7 @@ class FatigueHistoryViewModel @Inject constructor(
                 // Use week-state for the range to minimize API calls
                 val results = mutableListOf<DayState>()
                 var cursor = fromDate
+                var failedWeeks = 0
                 while (cursor <= today) {
                     val weekResponse = api.getWeekState(cursor.toString())
                     if (weekResponse.isSuccessful) {
@@ -93,23 +96,35 @@ class FatigueHistoryViewModel @Inject constructor(
                                 day.date >= fromDate.toString() && day.date <= today.toString()
                             })
                         }
+                    } else {
+                        Log.w(TAG, "Failed to fetch week state for $cursor: ${weekResponse.code()}")
+                        failedWeeks++
                     }
                     cursor = cursor.plus(7, DateTimeUnit.DAY)
                 }
 
-                // Deduplicate and sort
-                val deduplicated = results
-                    .distinctBy { it.date }
-                    .sortedByDescending { it.date }
+                // Check if all weeks failed
+                if (results.isEmpty() && failedWeeks > 0) {
+                    error = "Failed to load fatigue history. Please try again."
+                } else {
+                    // Deduplicate and sort
+                    val deduplicated = results
+                        .distinctBy { it.date }
+                        .sortedByDescending { it.date }
 
-                dayStates = deduplicated
+                    if (requestId == loadRequestId) {
+                        dayStates = deduplicated
+                    }
+                }
             } catch (e: kotlinx.coroutines.CancellationException) {
                 throw e
             } catch (e: Exception) {
                 Log.e(TAG, "loadHistory error", e)
                 error = e.message ?: "Failed to load history"
             } finally {
-                isLoading = false
+                if (requestId == loadRequestId) {
+                    isLoading = false
+                }
             }
         }
     }

@@ -1,0 +1,8 @@
+-keep,allowobfuscation,allowshrinking class com.amakaflow.wear.presentation.ReadinessViewModel
+-keep,allowobfuscation,allowshrinking class com.amakaflow.wear.presentation.ReadinessViewModel
+-keep,allowobfuscation,allowshrinking class com.amakaflow.wear.presentation.TodayScheduleViewModel
+-keep,allowobfuscation,allowshrinking class com.amakaflow.wear.presentation.TodayScheduleViewModel
+-keep,allowobfuscation,allowshrinking class com.amakaflow.wear.presentation.WorkoutListViewModel
+-keep,allowobfuscation,allowshrinking class com.amakaflow.wear.presentation.WorkoutListViewModel
+-keep,allowobfuscation,allowshrinking class com.amakaflow.wear.presentation.WorkoutExecutionViewModel
+-keep,allowobfuscation,allowshrinking class com.amakaflow.wear.presentation.WorkoutExecutionViewModel
