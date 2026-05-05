@@ -35,7 +35,11 @@ jobs:
         run: |
           chmod +x .github/scripts/affected-tests.sh
           RESULT="$(.github/scripts/affected-tests.sh)"
-          echo "result=$RESULT" >> "$GITHUB_OUTPUT"
+          {
+            echo "result<<EOF"
+            echo "$RESULT"
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
           echo "Affected result: $RESULT"
 
       - name: Run Lint (only when code changes)
@@ -47,12 +51,12 @@ jobs:
         if: steps.affected.outputs.result != 'NONE' && steps.affected.outputs.result != 'FULL'
         timeout-minutes: 15
         run: |
-          ARGS=""
+          ARGS=()
           for cls in ${{ steps.affected.outputs.result }}; do
-            ARGS="$ARGS --tests $cls"
+            ARGS+=(--tests "$cls")
           done
-          echo "Running: ./gradlew --no-daemon --stacktrace --info :app:testDebugUnitTest $ARGS"
-          ./gradlew --no-daemon --stacktrace --info :app:testDebugUnitTest $ARGS
+          echo "Running: ./gradlew --no-daemon --stacktrace --info :app:testDebugUnitTest ${ARGS[*]}"
+          ./gradlew --no-daemon --stacktrace --info :app:testDebugUnitTest "${ARGS[@]}"
 
       - name: Run full unit tests (fallback)
         if: steps.affected.outputs.result == 'FULL'
