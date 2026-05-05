@@ -11,6 +11,8 @@ import com.amakaflow.companion.data.nutrition.ParseTextResponse
 import com.amakaflow.companion.data.nutrition.PhotoAnalysisRequest
 import com.amakaflow.companion.data.nutrition.PhotoAnalysisResponse
 import com.amakaflow.companion.data.nutrition.ProteinNudgeResponse
+import com.amakaflow.companion.data.api.dto.TelegramLinkStatusResponse
+import com.amakaflow.companion.data.api.dto.TelegramLinkTokenResponse
 import retrofit2.Response
 import retrofit2.http.*
 
@@ -26,6 +28,16 @@ interface AmakaflowApi {
 
     @POST("mobile/pairing/refresh")
     suspend fun refreshToken(@Body request: TokenRefreshRequest): Response<TokenRefreshResponse>
+
+    // MARK: - Telegram linking (AMA-1758 Phase C)
+
+    /** Mint a one-time pairing token for the @amakaflow_userbot Telegram deep link. */
+    @POST("api/telegram/link-token")
+    suspend fun mintTelegramLinkToken(): Response<TelegramLinkTokenResponse>
+
+    /** Poll whether the bot has consumed a given pairing token. */
+    @GET("api/telegram/link-status")
+    suspend fun getTelegramLinkStatus(@Query("token") token: String): Response<TelegramLinkStatusResponse>
 
     // MARK: - Workouts
 

@@ -45,6 +45,7 @@ import com.amakaflow.companion.ui.screens.home.HomeScreen
 import com.amakaflow.companion.ui.screens.more.MoreScreen
 import com.amakaflow.companion.ui.screens.pairing.PairingScreen
 import com.amakaflow.companion.ui.screens.player.WorkoutPlayerScreen
+import com.amakaflow.companion.ui.screens.settings.ConnectTelegramScreen
 import com.amakaflow.companion.ui.screens.settings.SettingsScreen
 import com.amakaflow.companion.ui.screens.settings.SettingsViewModel
 import com.amakaflow.companion.ui.screens.settings.TranscriptionSettingsScreen
@@ -101,6 +102,7 @@ sealed class Screen(val route: String) {
     data object ErrorLog : Screen("error_log")
     data object DebugLog : Screen("debug_log")
     data object TranscriptionSettings : Screen("transcription_settings")
+    data object ConnectTelegram : Screen("connect_telegram")
     data object VoiceWorkout : Screen("voice_workout")
     data object AIImport : Screen("ai_import")
     data object CompletionDetail : Screen("completion/{completionId}") {
@@ -460,7 +462,16 @@ fun MainScreen(testConfig: TestConfig) {
                     },
                     onNavigateToTranscriptionSettings = {
                         navController.navigate(Screen.TranscriptionSettings.route)
+                    },
+                    onNavigateToConnectTelegram = {
+                        navController.navigate(Screen.ConnectTelegram.route)
                     }
+                )
+            }
+
+            composable(Screen.ConnectTelegram.route) {
+                ConnectTelegramScreen(
+                    onDismiss = { navController.popBackStack() }
                 )
             }
 
