@@ -414,12 +414,20 @@ data class WorkoutCompletionDetail(
 }
 
 /**
- * Voice workout parsing request
+ * Voice workout parsing request.
+ *
+ * AMA-1771: field names match the workout-ingestor `ParseVoiceRequest`
+ * server contract (`transcription`, `sport_hint`). Earlier this class
+ * sent `transcript` and `sport`, both of which the server silently
+ * dropped — and `transcription` is required (`Field(min_length=1)`),
+ * so any actual call would have 422'd. No callers exist on Android
+ * today; this fix is preventive so the next caller is correct.
  */
 @Serializable
 data class VoiceWorkoutRequest(
-    val transcript: String,
-    val sport: String? = null
+    val transcription: String,
+    @SerialName("sport_hint")
+    val sportHint: String? = null,
 )
 
 /**
