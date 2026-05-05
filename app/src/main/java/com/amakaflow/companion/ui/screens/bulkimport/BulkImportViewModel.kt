@@ -88,7 +88,7 @@ class BulkImportViewModel @Inject constructor(
         viewModelScope.launch {
             state = state.copy(isLoading = true, error = null)
             try {
-                val request = BulkDetectRequest(urls = urls)
+                val request = BulkDetectRequest(sources = urls)
                 val response = ingestorApi.detectImport(request)
                 val detectBody = response.body()
                 if (response.isSuccessful && detectBody != null && detectBody.success) {

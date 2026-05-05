@@ -7,11 +7,22 @@ import kotlinx.serialization.Serializable
 // Bulk Import Models (AMA-1408 native parity)
 // =============================================================================
 
+/**
+ * AMA-1770: matches mapper-api's `BulkDetectRequest` contract
+ * (`profile_id`, `source_type`, `sources`). `profile_id` is optional —
+ * the server falls back to the authenticated user from the JWT when
+ * omitted, so we don't need to wire user_id retrieval into this VM.
+ *
+ * `source_type` defaults to "urls" since the Android UI only collects
+ * URLs today; file/image flows would override.
+ */
 @Serializable
 data class BulkDetectRequest(
-    val urls: List<String>,
+    val sources: List<String>,
+    @SerialName("source_type")
+    val sourceType: String = "urls",
     @SerialName("profile_id")
-    val profileId: String? = null
+    val profileId: String? = null,
 )
 
 @Serializable
