@@ -11,6 +11,9 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+    timeout-minutes: 35
+    env:
+      GRADLE_OPTS: -Dorg.gradle.daemon=false -Dorg.gradle.jvmargs=-Xmx3072m -Dkotlin.daemon.jvm.options=-Xmx1536m
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -31,33 +34,39 @@ jobs:
         id: affected
         run: |
           chmod +x .github/scripts/affected-tests.sh
-          echo "result=$(.github/scripts/affected-tests.sh)" >> "$GITHUB_OUTPUT"
-          echo "Affected result: $(.github/scripts/affected-tests.sh)"
+          RESULT="$(.github/scripts/affected-tests.sh)"
+          echo "result=$RESULT" >> "$GITHUB_OUTPUT"
+          echo "Affected result: $RESULT"
 
       - name: Run Lint (only when code changes)
         if: steps.affected.outputs.result != 'NONE'
-        run: ./gradlew lintDebug
+        timeout-minutes: 10
+        run: ./gradlew --no-daemon --stacktrace lintDebug
 
       - name: Run impacted unit tests
         if: steps.affected.outputs.result != 'NONE' && steps.affected.outputs.result != 'FULL'
+        timeout-minutes: 15
         run: |
           ARGS=""
           for cls in ${{ steps.affected.outputs.result }}; do
             ARGS="$ARGS --tests $cls"
           done
-          echo "Running: ./gradlew :app:testDebugUnitTest $ARGS"
-          ./gradlew :app:testDebugUnitTest $ARGS
+          echo "Running: ./gradlew --no-daemon --stacktrace --info :app:testDebugUnitTest $ARGS"
+          ./gradlew --no-daemon --stacktrace --info :app:testDebugUnitTest $ARGS
 
       - name: Run full unit tests (fallback)
         if: steps.affected.outputs.result == 'FULL'
-        run: ./gradlew testDebugUnitTest
+        timeout-minutes: 20
+        run: ./gradlew --no-daemon --stacktrace --info testDebugUnitTest
 
       - name: Upload Test Results
         uses: actions/upload-artifact@v4
         if: always()
         with:
           name: test-results
-          path: app/build/test-results/
+          path: |
+            **/build/test-results/**
+            **/build/reports/tests/**
           retention-days: 14
 
       - name: Upload Lint Results
@@ -65,5 +74,7 @@ jobs:
         if: always()
         with:
           name: lint-results
-          path: app/build/reports/lint-results-debug.html
+          path: |
+            **/build/reports/lint-results*.html
+            **/build/reports/lint-results*.xml
           retention-days: 14
