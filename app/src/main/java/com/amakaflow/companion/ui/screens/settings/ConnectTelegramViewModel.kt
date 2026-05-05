@@ -60,6 +60,7 @@ class ConnectTelegramViewModel @Inject constructor(
     private val _launchTelegram = MutableStateFlow<String?>(null)
     val launchTelegram: StateFlow<String?> = _launchTelegram.asStateFlow()
 
+    private var connectJob: Job? = null
     private var pollJob: Job? = null
 
     /** Begin the connect flow: mint a token, surface the native_link to the screen, start polling. */
@@ -70,8 +71,12 @@ class ConnectTelegramViewModel @Inject constructor(
             return
         }
         _state.value = ConnectTelegramUiState.Minting
-        viewModelScope.launch {
+        connectJob?.cancel()
+        connectJob = viewModelScope.launch {
             val resp = runCatching { api.mintTelegramLinkToken() }.getOrNull()
+            // If the user cancelled while the mint request was in flight, bail before
+            // touching state / launching the Telegram intent.
+            if (_state.value !is ConnectTelegramUiState.Minting) return@launch
             val body = resp?.body()
             if (resp == null || !resp.isSuccessful || body == null) {
                 _state.value = ConnectTelegramUiState.Error(
@@ -79,14 +84,21 @@ class ConnectTelegramViewModel @Inject constructor(
                 )
                 return@launch
             }
+            // Use the server's TTL (clamped to a sane max so a misconfigured server can't
+            // cause indefinite polling). This avoids the false-Expired bug when the user
+            // came back to the app after a brief background.
+            val pollWindowSeconds = body.expiresInSeconds
+                .coerceAtLeast(1L)
+                .coerceAtMost(MAX_POLL_WINDOW_SECONDS.toLong())
+                .toInt()
             _state.value = ConnectTelegramUiState.AwaitingPair(
                 token = body.token,
                 deepLink = body.deepLink,
                 nativeLink = body.nativeLink,
-                secondsRemaining = body.expiresInSeconds.toInt().coerceAtMost(POLL_WINDOW_SECONDS),
+                secondsRemaining = pollWindowSeconds,
             )
             _launchTelegram.value = body.nativeLink
-            startPolling(body.token)
+            startPolling(body.token, pollWindowSeconds)
         }
     }
 
@@ -95,8 +107,10 @@ class ConnectTelegramViewModel @Inject constructor(
         _launchTelegram.value = null
     }
 
-    /** User cancels mid-flow — stop polling and return to Idle. */
+    /** User cancels mid-flow — stop both the mint request and polling, and return to Idle. */
     fun cancel() {
+        connectJob?.cancel()
+        connectJob = null
         pollJob?.cancel()
         pollJob = null
         _state.value = ConnectTelegramUiState.Idle
@@ -114,11 +128,11 @@ class ConnectTelegramViewModel @Inject constructor(
         }
     }
 
-    private fun startPolling(token: String) {
+    private fun startPolling(token: String, pollWindowSeconds: Int) {
         pollJob?.cancel()
         pollJob = viewModelScope.launch {
             var elapsed = 0
-            while (elapsed < POLL_WINDOW_SECONDS) {
+            while (elapsed < pollWindowSeconds) {
                 delay(POLL_INTERVAL_MS)
                 elapsed += (POLL_INTERVAL_MS / 1000).toInt()
 
@@ -130,7 +144,7 @@ class ConnectTelegramViewModel @Inject constructor(
                 }
                 _state.update { current ->
                     if (current is ConnectTelegramUiState.AwaitingPair) {
-                        current.copy(secondsRemaining = (POLL_WINDOW_SECONDS - elapsed).coerceAtLeast(0))
+                        current.copy(secondsRemaining = (pollWindowSeconds - elapsed).coerceAtLeast(0))
                     } else {
                         current
                     }
@@ -142,13 +156,15 @@ class ConnectTelegramViewModel @Inject constructor(
     }
 
     override fun onCleared() {
+        connectJob?.cancel()
         pollJob?.cancel()
         super.onCleared()
     }
 
     companion object {
         const val POLL_INTERVAL_MS: Long = 3_000L
-        /** How long we'll keep polling after launching the Telegram intent. */
-        const val POLL_WINDOW_SECONDS: Int = 90
+        /** Hard upper bound on how long we'll keep polling, even if the server says the
+         *  token lives longer. Keeps us from looping forever on a misconfigured server. */
+        const val MAX_POLL_WINDOW_SECONDS: Int = 15 * 60
     }
 }

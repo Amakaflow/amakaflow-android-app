@@ -108,9 +108,10 @@ class ConnectTelegramViewModelTest {
     }
 
     @Test
-    fun `polling expires after the configured window`() = runTest {
+    fun `polling expires after the server-supplied window when shorter than the cap`() = runTest {
         val api = mockk<AmakaflowApi>()
-        coEvery { api.mintTelegramLinkToken() } returns Response.success(mintBody)
+        // Server says 30s — well below the 15-min cap.
+        coEvery { api.mintTelegramLinkToken() } returns Response.success(mintBody.copy(expiresInSeconds = 30))
         coEvery { api.getTelegramLinkStatus("tok-abc") } returns Response.success(
             TelegramLinkStatusResponse(linked = false)
         )
@@ -119,13 +120,32 @@ class ConnectTelegramViewModelTest {
         vm.startConnect()
         runCurrent()
 
-        // Advance past the full polling window plus one tick to trigger Expired.
-        val totalMs =
-            ConnectTelegramViewModel.POLL_WINDOW_SECONDS * 1_000L + ConnectTelegramViewModel.POLL_INTERVAL_MS
-        advanceTimeBy(totalMs)
+        // Advance past the 30s polling window + one extra tick to trigger Expired.
+        advanceTimeBy(30_000L + ConnectTelegramViewModel.POLL_INTERVAL_MS)
         runCurrent()
 
         assertThat(vm.state.value).isEqualTo(ConnectTelegramUiState.Expired)
+    }
+
+    @Test
+    fun `polling clamps to MAX_POLL_WINDOW_SECONDS when server TTL is longer`() = runTest {
+        val api = mockk<AmakaflowApi>()
+        // Server claims 1 hour — should be clamped to 15 minutes.
+        coEvery { api.mintTelegramLinkToken() } returns Response.success(mintBody.copy(expiresInSeconds = 3_600))
+        coEvery { api.getTelegramLinkStatus("tok-abc") } returns Response.success(
+            TelegramLinkStatusResponse(linked = false)
+        )
+
+        val vm = ConnectTelegramViewModel(api)
+        vm.startConnect()
+        runCurrent()
+
+        val s = vm.state.value
+        assertThat(s).isInstanceOf(ConnectTelegramUiState.AwaitingPair::class.java)
+        assertThat((s as ConnectTelegramUiState.AwaitingPair).secondsRemaining)
+            .isEqualTo(ConnectTelegramViewModel.MAX_POLL_WINDOW_SECONDS)
+
+        vm.cancel()
     }
 
     @Test
@@ -146,9 +166,36 @@ class ConnectTelegramViewModelTest {
         assertThat(vm.launchTelegram.value).isNull()
 
         // Pushing time forward should NOT now flip us into a terminal state.
-        advanceTimeBy(ConnectTelegramViewModel.POLL_WINDOW_SECONDS * 1_000L)
+        advanceTimeBy(ConnectTelegramViewModel.MAX_POLL_WINDOW_SECONDS * 1_000L)
         runCurrent()
         assertThat(vm.state.value).isEqualTo(ConnectTelegramUiState.Idle)
+    }
+
+    @Test
+    fun `cancel during in-flight mint does not flip back to AwaitingPair`() = runTest {
+        // Mint hangs forever — simulates a slow network request the user cancels mid-flight.
+        val api = mockk<AmakaflowApi>()
+        coEvery { api.mintTelegramLinkToken() } coAnswers {
+            kotlinx.coroutines.awaitCancellation()
+        }
+        coEvery { api.getTelegramLinkStatus(any()) } returns Response.success(
+            TelegramLinkStatusResponse(linked = false)
+        )
+
+        val vm = ConnectTelegramViewModel(api)
+        vm.startConnect()
+        runCurrent()
+        assertThat(vm.state.value).isEqualTo(ConnectTelegramUiState.Minting)
+
+        // User taps Cancel while the mint is still in flight.
+        vm.cancel()
+        assertThat(vm.state.value).isEqualTo(ConnectTelegramUiState.Idle)
+
+        // Even after time passes, we should NOT race into AwaitingPair / launch the intent.
+        advanceTimeBy(5_000L)
+        runCurrent()
+        assertThat(vm.state.value).isEqualTo(ConnectTelegramUiState.Idle)
+        assertThat(vm.launchTelegram.value).isNull()
     }
 
     @Test
