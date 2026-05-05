@@ -9,6 +9,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.automirrored.filled.VolumeUp
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
@@ -50,6 +51,7 @@ fun SettingsScreen(
     onNavigateToWorkoutDebug: () -> Unit = {},
     onNavigateToDebugLog: () -> Unit = {},
     onNavigateToTranscriptionSettings: () -> Unit = {},
+    onNavigateToConnectTelegram: () -> Unit = {},
     testConfig: TestConfig? = null,
     viewModel: SettingsViewModel = hiltViewModel(),
     simulationSettings: SimulationSettings? = null
@@ -287,6 +289,16 @@ fun SettingsScreen(
                 subtitle = "Sync workouts and activity data",
                 isConnected = false,
                 onReauthorize = { /* Re-authorize Health Connect */ }
+            )
+        }
+        item {
+            NavigationSettingItem(
+                icon = Icons.AutoMirrored.Filled.Send,
+                iconBackground = Color(0xFF229ED9).copy(alpha = 0.2f),
+                iconTint = Color(0xFF229ED9),
+                title = "Telegram",
+                subtitle = "Connect your account to chat with the coach",
+                onClick = onNavigateToConnectTelegram
             )
         }
 
