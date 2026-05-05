@@ -32,6 +32,7 @@ jobs:
 
       - name: Determine affected tests
         id: affected
+        timeout-minutes: 10
         run: |
           chmod +x .github/scripts/affected-tests.sh
           RESULT="$(.github/scripts/affected-tests.sh)"
@@ -50,11 +51,15 @@ jobs:
       - name: Run impacted unit tests
         if: steps.affected.outputs.result != 'NONE' && steps.affected.outputs.result != 'FULL'
         timeout-minutes: 15
+        env:
+          AFFECTED_TESTS: ${{ steps.affected.outputs.result }}
         run: |
           ARGS=()
-          for cls in ${{ steps.affected.outputs.result }}; do
+          set -f
+          for cls in $AFFECTED_TESTS; do
             ARGS+=(--tests "$cls")
           done
+          set +f
           echo "Running: ./gradlew --no-daemon --stacktrace --info :app:testDebugUnitTest ${ARGS[*]}"
           ./gradlew --no-daemon --stacktrace --info :app:testDebugUnitTest "${ARGS[@]}"
 
