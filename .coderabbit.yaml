@@ -4,7 +4,7 @@ language: "en-US"
 reviews:
   profile: "assertive"
   auto_review:
-    enabled: true
+    enabled: false  # CR PR #83 review fix: org policy = manual @coderabbitai trigger only
     drafts: false
 
 knowledge_base:
